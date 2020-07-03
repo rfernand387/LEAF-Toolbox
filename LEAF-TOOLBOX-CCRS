@@ -48,13 +48,13 @@
 
 
 /*--------------------------------------------------------------------------------*/
-/* Landsat 8 Surface Reflectance                                                  */  
+/* Landsat 8 Surface_Reflectance                                                  */  
 /*                                                                                */
 /* Uncomment the algorithm set you want to use               
 /*--------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------*/
-/* Landsat 8 Surface Reflectance SL2P algoirthm                                   */                 
+/* Landsat 8 Surface_Reflectance SL2P algoirthm                                   */                 
 /*--------------------------------------------------------------------------------*/
 var l8_createFeatureCollection_Network_Ind = function(){
   var collection= ee.FeatureCollection('users/hemitshah/Parameter_file_2');
@@ -107,7 +107,7 @@ var l8_createFeatureCollection_domains = function(){
 
 
 /*--------------------------------------------------------------------------------*/
-/* Sentinel 2 Surface Reflectance CCRS algorithm                                 */                 
+/* Sentinel 2 Surface_Reflectance CCRS algorithm                                 */                 
 /*--------------------------------------------------------------------------------*/
 var s2_createFeatureCollection_Network_Ind = function(){
   var collection= ee.FeatureCollection('users/hemitshah/Parameter_file_2'); 
@@ -666,7 +666,7 @@ app.exportMapLayer = function() {
     //insert try catch statements 
     case  'COPERNICUS/S2_SR':
       switch (app.vis.select.getValue()) {
-        case 'Surface Reflectance':
+        case 'Surface_Reflectance':
           var visCollection = filtered;
           break;
         default:
@@ -701,7 +701,7 @@ app.exportMapLayer = function() {
       break;
     case  'LANDSAT/LC08/C01/T1_SR':
       switch (app.vis.select.getValue()) {
-        case 'Surface Reflectance':
+        case 'Surface_Reflectance':
           var visCollection = filtered;
           break;
         default:
@@ -737,7 +737,7 @@ app.exportMapLayer = function() {
     break;
     case  'users/rfernand387/L2avalidation':
       switch (app.vis.select.getValue()) {
-        case 'Surface Reflectance':
+        case 'Surface_Reflectance':
           var visCollection = filtered;
           break;
         default:
@@ -837,11 +837,11 @@ app.refreshMapLayer = function() {
     var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered.geometry()).select(['partition'],['partition']);
     Map.addLayer(partition, {bands:'partition',min:1, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Partition');
     switch (app.vis.select.getValue()) {
-      case 'Surface Reflectance':
+      case 'Surface_Reflectance':
         // Just show a RgB composite
         var visMosaic = filtered.mosaic();
         Map.addLayer(visMosaic, { bands:'date'},'Date');
-        Map.addLayer(visMosaic, app.COLLECTION_OPTIONS[app.collectionName].visParams , 'Surface Reflectance');
+        Map.addLayer(visMosaic, app.COLLECTION_OPTIONS[app.collectionName].visParams , 'Surface_Reflectance');
       break;
       default:
         //apply regression to estimate parameter
@@ -1214,20 +1214,20 @@ app.createConstants = function() {
     },
   };
   app.VIS_OPTIONS = {
-    'Surface Reflectance': {
+    'Surface_Reflectance': {
       'COPERNICUS/S2_SR': {
-        Name: 'Surface Reflectance',
-        description: 'Surface Reflectance',
+        Name: 'Surface_Reflectance',
+        description: 'Surface_Reflectance',
         outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
         },
       'LANDSAT/LC08/C01/T1_SR': {
-        Name: 'Surface Reflectance',
-        description: 'Surface Reflectance',
+        Name: 'Surface_Reflectance',
+        description: 'Surface_Reflectance',
         outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
         },
       'users/rfernand387/L2avalidation': {
-        Name: 'Surface Reflectance',
-        description: 'Surface Reflectance',
+        Name: 'Surface_Reflectance',
+        description: 'Surface_Reflectance',
         outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
         }
       },
