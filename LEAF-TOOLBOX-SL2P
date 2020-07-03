@@ -1,7 +1,7 @@
-// sl2pC - Simplified Level 2 Processor CCRS Version   
+// sl2pC - Simplified Level 2 Processor CCRS Version  
 //
 /* GEE Javascript implementation of the CCRS Version
- of the Simplified Level 2 Processor of Weiss and Baret (2014).
+ of the Simplified Level 2 Processor of Weiss and Baret (2014). 
 
  Input: Collection of either Landsat 5 or Landsat 7 or Landsat 8 
         or Sentinel 2a or Sentinel 2b surface reflectance products.
@@ -43,10 +43,8 @@
 /*--------------------------------------------------------------------------------*/
 /* Region of interest , optional                                                  */
 /*--------------------------------------------------------------------------------*/
-var featureNumber = ee.Number(1);
-var geometry = ee.FeatureCollection(ee.Feature(table.toList(table.size()).get(featureNumber))).geometry();
-var imageCollection = ee.ImageCollection('users/rfernand387/L2avalidation')
-print(imageCollection)
+//var featureNumber = ee.Number(1);
+//var geometry = ee.FeatureCollection(ee.Feature(table.toList(table.size()).get(featureNumber))).geometry();
 
 
 /*--------------------------------------------------------------------------------*/
@@ -60,13 +58,20 @@ print(imageCollection)
 /*--------------------------------------------------------------------------------*/
 var l8_createFeatureCollection_Network_Ind = function(){
   var collection= ee.FeatureCollection('users/hemitshah/Parameter_file_2');
-  //print(collection);
+  //print(collection); 
   return(collection);
 };
 
 var l8_createImageCollection_partition = function(){
-  var collection= ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles');
-  //print(collection);
+  var collection = ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles')
+                     .map(function(image) { return image.select("b1").rename("partition")})
+                     .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")
+                              .map(function(image) { return image.select("discrete_classification")
+                                                                 .remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0)
+                                                                  .toUint8()
+                                                                  .rename("partition")}))
+                     .mosaic()
+  //print(collection); 
   return(collection);
 };
 
@@ -100,11 +105,6 @@ var l8_createFeatureCollection_domains = function(){
   return(collection);
 };
 
-/*--------------------------------------------------------------------------------*/
-/* Sentinel 2 Surface Reflectance                                                 */
-/*                                                                                */
-/* Uncomment the algorithm set you want to use               
-/*--------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------*/
 /* Sentinel 2 Surface Reflectance SL2P algorithm                                 */                 
@@ -116,7 +116,13 @@ var s2_createFeatureCollection_Network_Ind = function(){
 };
 
 var s2_createImageCollection_partition = function(){
-  var collection= ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles');
+  var collection = ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles')
+                     .map(function(image) { return image.select("b1").rename("partition")})
+                     .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")
+                              .map(function(image) { return image.select("discrete_classification")
+                                                                 .remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0)
+                                                                  .toUint8()
+                                                                  .rename("partition")}));
   //print(collection);
   return(collection);
 };
@@ -190,91 +196,6 @@ var s2_createFeatureCollection_domains = function(){
   //print(collection)
   return(collection);
 };
-
-/*--------------------------------------------------------------------------------*/
-/* Sentinel 2 Surface Reflectance CCRS Parameters                                 */                 
-/*--------------------------------------------------------------------------------*/
-/*var s2_createFeatureCollection_Network_Ind = function(){
-  var collection= ee.FeatureCollection('users/hemitshah/Parameter_file_2');
-  //print(collection);
-  return(collection);
-};
-
-var s2_createImageCollection_partition = function(){
-  var collection= ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles');
-  //print(collection);
-  return(collection);
-};
-
-var s2_createFeatureCollection_legend = function(){
-  var collection= ee.FeatureCollection('users/hemitshah/Legend_csv');
-  //print(collection);
-  return(collection);
-};
-
-var s2_createFeatureCollection_estimates = function(){
-  var collection= ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_weiss_or_prosail3_NNT3_Single_0_1_')
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/closed_cropland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_weiss_or_prosail3_NNT3_Single_0_1_'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/evergreen_needleaf_forest'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/grassland_pasture'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/lichen_feathermoss')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/polar_grassland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/polar_shrubland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/shrublands')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/sparse_cropland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_output/sphagnum_feathermoss')); 
-  //print(collection);
-   return(collection);
-};
-
-var s2_createFeatureCollection_errors = function(){
-  var collection= ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_weiss_or_prosail3_NNT3_Single_0_1_error_up')
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/closed_cropland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_weiss_or_prosail3_NNT3_Single_0_1_error_up'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/evergreen_needleaf_forest'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/grassland_pasture'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/lichen_feathermoss')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/polar_grassland')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/polar_shrubland')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/shrubland'))
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/sparse_cropland')) 
-                    .merge(ee.FeatureCollection('users/ccrs1fy2020/s2_sl2p_error/sphagnum_feathermoss')); 
-  //print(collection);
-   return(collection);
-};
-
-var s2_createFeatureCollection_ranges = function(){
-  var collection= ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/weiss_or_prosail3_NNT3_Single_0_1_RANGE')
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/closed_cropland_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/weiss_or_prosail3_NNT3_Single_0_1_RANGE'))
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/evergreen_needleaf_forest_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/grassland_pasture_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/lichen_feathermoss_RANGE'))
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/polar_grassland_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/polar_shrubland_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/shrubland_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/sparse_cropland_RANGE')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/sphagnum_feathermoss_RANGE')); 
-  //print(collection)
-  return(collection);
-};
-
-var s2_createFeatureCollection_domains = function(){
-  var collection= ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/weiss_or_prosail3_NNT3_Single_0_1_DOMAIN')
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/closed_cropland_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/weiss_or_prosail3_NNT3_Single_0_1_DOMAIN'))
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/evergreen_needleaf_forest_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/grassland_pasture_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/lichen_feathermoss_DOMAIN'))
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/polar_grassland_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/polar_shrubland_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/shrubland_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/sparse_cropland_DOMAIN')) 
-                    .merge(ee.FeatureCollection('users/rfernand387/COPERNICUS_S2_SR/sphagnum_feathermoss_DOMAIN')); 
-  //print(collection)
-  return(collection);
-};*/
 
 /*--------------------------------------------------------------------------------*/
 /* End of user specification                                                      */
@@ -419,7 +340,7 @@ app.applyFilters = function() {
   var computedIds = filtered.limit(app.IMAGE_COUNT_LIMIT)
                             .reduceColumns(ee.Reducer.toList(), ['system:index'])
                             .get('list');
-  print(computedIds)
+
   // updathe the UI and proceed only if we get products
   computedIds.evaluate(function(ids) {
     // Update the image picker with the given list of ids.
@@ -491,7 +412,7 @@ var getClassColl = function(img, landclass){
 
   var updated_image = img.updateMask(code_layer.eq(landclass));
     //initialize dictionary 
-    class_col.img = updated_image.select(ee.List(img.bandNames()).remove('remapped').remove('b1'));
+    class_col.img = updated_image.select(ee.List(img.bandNames()).remove('remapped').remove('partition'));
     class_col.ind = ee.Number(landclass).int();
   
   return (class_col);
@@ -578,10 +499,11 @@ var make_indexLayer = function(image){
    //  print(landcover);
   var landclass_re = landclass.map(function(property){return ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Network_Ind.first()).toDictionary().getNumber(property);});
     //   print(landclass_re);
-  var indexLayer = image.remap(landcover, landclass_re, 0, 'b1');
+  var indexLayer = image.remap(landcover, landclass_re, 0, 'partition');
         
 return(image.addBands(indexLayer));
 };
+
 
 // applies a set of shallow networks to an image based on a provided land cover map
 var wrapperNNets = function(network, filtered_col){
@@ -589,8 +511,10 @@ var wrapperNNets = function(network, filtered_col){
   // typecast function parameters
   var network = ee.List(network);
   var filtered_col = ee.Image(filtered_col);
-  var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered_col.geometry()).select(['b1'],['partition']);
+  
+  
   // parse land classes used to identify network to use
+  var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered_col.geometry()).select(['partition'],['partition']);
   var landclass = ee.Number(ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Network_Ind.first()).propertyNames().remove('system:index').remove('lon').size()).subtract(2);
 
   // determine networks based on collection
@@ -711,35 +635,94 @@ app.exportMapLayer = function() {
     var start = app.filters.startDate.getValue();
     var end = app.filters.endDate.getValue();
     var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
-    
+
   // subset collection to one image if required
-  if (app.picker.allImages.getValue()) {
-    // filter collection for all products 
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
-                      .filterBounds(app.filters.mapBounds)
-                      .filterDate(start[0], end[0])
-                      .filterMetadata((app.COLLECTION_OPTIONS[app.filters.selectCollection.getValue()])
-                                        .Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
-                      .map(addDate)
-                      .map(function(image){return image.clip(app.filters.mapBounds)})
-                      .map(deltaTime.bind(null,midDate))
-                      .sort('deltaTime');
+  var netOptions = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()];
+  
+  if (app.picker.select.getValue()) {
+    var start = app.filters.startDate.getValue();
+    var end = app.filters.endDate.getValue();
+    var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
+    if (app.picker.allImages.getValue()) {
+      // filter collection for all products 
+      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+                    .filterBounds(app.filters.mapBounds)
+                    .filterDate(start[0], end[0])
+                    .filterMetadata((app.COLLECTION_OPTIONS[app.filters.selectCollection.getValue()])
+                                          .Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
+                    .map(addDate)
+                    .map(function(image){return image.clip(app.filters.mapBounds)})
+                    .map(deltaTime.bind(null,midDate))
+                    .sort('deltaTime');
+  
+    }
+    else {
+      // process selected image only
+      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+                    .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
+                    .map(addDate)
+                    .map(function(image){return image.clip(app.filters.mapBounds)})
+                    .map(deltaTime.bind(null,midDate))
+                    .sort('deltaTime');
+  
+    }
+    print('filtered')
+    print(filtered)
+
+    // mask based on collection
+    switch (app.filters.selectCollection.getValue()) {
+      case  'COPERNICUS/S2_SR':
+        var filtered = filtered.map(app.mask.sentinel2())
+                                .map(s2Mask);
+      break;
+      case  'LANDSAT/LC08/C01/T1_SR': 
+        var filtered = filtered.map(app.mask.landsatSR())
+                                .map(l08Mask);
+      break;
+      case  'users/rfernand387/L2avalidation': 
+        var filtered = filtered.map(ccrsSentinel2)
+                                .map(app.mask.sentinel2())
+                                .map(s2Mask);
+      break;
+      default: print('Invalid collection');
+      break;
+    }
     
+    // display based on parameter value
+    var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered.geometry()).select(['partition'],['partition']);
+    Map.addLayer(partition, {bands:'partition',min:1, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Partition');
+    switch (app.vis.select.getValue()) {
+      case 'Surface Reflectance':
+        // Just show a RgB composite
+        var visMosaic = filtered.mosaic();
+        Map.addLayer(visMosaic, { bands:'date'},'Date');
+        Map.addLayer(visMosaic, app.COLLECTION_OPTIONS[app.collectionName].visParam , 'Surface Reflectance');
+      break;
+      default:
+        //apply regression to estimate parameter
+        var visMosaic = filtered.map(wrapperNNets.bind(null,app.SL2P))
+                              .map(wrapperNNets.bind(null,app.errorSL2P))
+                              .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
+                              .mosaic();
+                              
+        //Displays the Collection of filtered images with the vis parameters 
+        var visParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['outputParams'];
+        var errorParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['errorParams'];
+        Map.addLayer(visMosaic, { bands:'date'},'Date');
+        Map.addLayer(visMosaic, {bands:'flag'},'Landclass');
+        Map.addLayer(visMosaic, { bands:'code'},'Masked Layer');
+        Map.addLayer(visMosaic, errorParams , netOptions.errorName);
+        Map.addLayer(visMosaic, visParams , netOptions.Name);
+      break;
+    }
   }
-  else {
-    // process selected image only
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
-                      .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
-                      .map(addDate)
-                      .map(function(image){return image.clip(app.filters.mapBounds)})
-                      .map(deltaTime.bind(null,midDate))
-                      .sort('deltaTime');
-  }
+ 
   switch (app.filters.selectCollection.getValue()) {
     //insert try catch statements 
     case  'COPERNICUS/S2_SR':
       switch (app.vis.select.getValue()) {
-        case 'Refl':
+        case 'Surface Reflectance':
+          var visCollection = filtered;
           break;
         default:
 
@@ -779,7 +762,8 @@ app.exportMapLayer = function() {
       break;
     case  'LANDSAT/LC08/C01/T1_SR':
             switch (app.vis.select.getValue()) {
-        case 'Refl':
+        case 'Surface Reflectance':
+          var visCollection = filtered;
           break;
         default:
           var visCollection = filtered.map(app.mask.landsatSR())
@@ -817,7 +801,8 @@ app.exportMapLayer = function() {
       break;
       case  'users/rfernand387/L2avalidation':
       switch (app.vis.select.getValue()) {
-        case 'Refl':
+        case 'Surface Reflectance':
+          var visCollection = filtered;
           break;
         default:
 
@@ -873,102 +858,80 @@ app.refreshMapLayer = function() {
     var start = app.filters.startDate.getValue();
     var end = app.filters.endDate.getValue();
     var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
-  if (app.picker.allImages.getValue()) {
-    // filter collection for all products 
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
-                  .filterBounds(app.filters.mapBounds)
-                  .filterDate(start[0], end[0])
-                  .filterMetadata((app.COLLECTION_OPTIONS[app.filters.selectCollection.getValue()])
-                                        .Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
-                  .map(addDate)
-                  .map(function(image){return image.clip(app.filters.mapBounds)})
-                  .map(deltaTime.bind(null,midDate))
-                  .sort('deltaTime');
-
-  }
-  else {
-    // process selected image only
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
-                  .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
-                  .map(addDate)
-                  .map(function(image){return image.clip(app.filters.mapBounds)})
-                  .map(deltaTime.bind(null,midDate))
-                  .sort('deltaTime');
-
-  }
-print('filtered')
-print(filtered)
-  // process collection selected
-  switch (app.filters.selectCollection.getValue()) {
-    case  'COPERNICUS/S2_SR': 
-      switch (app.vis.select.getValue()) {
-        case 'Refl':
-          break;
-        default:     
-          var visMosaic = filtered.map(app.mask.sentinel2())
-                                  .map(s2Mask)
-                                  .map(InvalidInput)
-                                  .map(wrapperNNets.bind(null,app.SL2P))
-                                  .map(wrapperNNets.bind(null,app.errorSL2P))
-                                  .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
-                                 .mosaic();
-
-          break;
-      } 
-      break;
-    case  'LANDSAT/LC08/C01/T1_SR': 
-      switch (app.vis.select.getValue()) {
-        case 'Refl':
-          break;
-        default:
-          var visMosaic  =  filtered.map(app.mask.landsatSR())
-                                    .map(l08Mask)
-                                    .map(InvalidInput)
-                                    .map(wrapperNNets.bind(null,app.SL2P))
-                                    .map(wrapperNNets.bind(null,app.errorSL2P))
-                                    .map(app.mask.landsatSR())
-                                    .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
-                                    .mosaic();
-          break;
-      }
-      break;
-          case  'users/rfernand387/L2avalidation': 
-      switch (app.vis.select.getValue()) {
-        case 'Refl':
-          break;
-        default:     
-          var visMosaic = filtered.map(ccrsSentinel2)
-                                  .map(app.mask.sentinel2())
-                                  .map(s2Mask)
-                                  .map(InvalidInput)
-                                  .map(wrapperNNets.bind(null,app.SL2P))
-                                  .map(wrapperNNets.bind(null,app.errorSL2P))
-                                  .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
-                                 .mosaic();
-
-          break;
-      } 
-      break;
-
-    default: print('invalid collection for masking');
-          break;
-  }
+    if (app.picker.allImages.getValue()) {
+      // filter collection for all products 
+      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+                    .filterBounds(app.filters.mapBounds)
+                    .filterDate(start[0], end[0])
+                    .filterMetadata((app.COLLECTION_OPTIONS[app.filters.selectCollection.getValue()])
+                                          .Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
+                    .map(addDate)
+                    .map(function(image){return image.clip(app.filters.mapBounds)})
+                    .map(deltaTime.bind(null,midDate))
+                    .sort('deltaTime');
   
+    }
+    else {
+      // process selected image only
+      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+                    .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
+                    .map(addDate)
+                    .map(function(image){return image.clip(app.filters.mapBounds)})
+                    .map(deltaTime.bind(null,midDate))
+                    .sort('deltaTime');
+  
+    }
+    print('filtered')
+    print(filtered)
 
-  // Display results
-  var visParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['outputParams'];
-  var errorParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['errorParams'];
-
-  //Outputs the Collection of filtered images with the vis parameters 
-  Map.addLayer(visMosaic, {bands:'partition',min:1, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Partition');
-  Map.addLayer(visMosaic, errorParams , netOptions.errorName);
-  Map.addLayer(visMosaic, visParams , netOptions.Name);
-  Map.addLayer(visMosaic, {bands:'flag'},'Landclass');
-  Map.addLayer(visMosaic, { bands:'code'},'Masked Layer');
-  Map.addLayer(visMosaic, { bands:'date'},'Date');
-
+    // mask based on collection
+    switch (app.filters.selectCollection.getValue()) {
+      case  'COPERNICUS/S2_SR':
+        var filtered = filtered.map(app.mask.sentinel2())
+                                .map(s2Mask);
+      break;
+      case  'LANDSAT/LC08/C01/T1_SR': 
+        var filtered = filtered.map(app.mask.landsatSR())
+                                .map(l08Mask);
+      break;
+      case  'users/rfernand387/L2avalidation': 
+        var filtered = filtered.map(ccrsSentinel2)
+                                .map(app.mask.sentinel2())
+                                .map(s2Mask);
+      break;
+      default: print('Invalid collection');
+      break;
+    }
+    
+    // display based on parameter value
+    var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered.geometry()).select(['partition'],['partition']);
+    Map.addLayer(partition, {bands:'partition',min:1, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Partition');
+    switch (app.vis.select.getValue()) {
+      case 'Surface Reflectance':
+        // Just show a RgB composite
+        var visMosaic = filtered.mosaic();
+        Map.addLayer(visMosaic, { bands:'date'},'Date');
+        Map.addLayer(visMosaic, app.COLLECTION_OPTIONS[app.collectionName].visParams , 'Surface Reflectance');
+      break;
+      default:
+        //apply regression to estimate parameter
+        var visMosaic = filtered.map(wrapperNNets.bind(null,app.SL2P))
+                              .map(wrapperNNets.bind(null,app.errorSL2P))
+                              .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
+                              .mosaic();
+                              
+        //Displays the Collection of filtered images with the vis parameters 
+        var visParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['outputParams'];
+        var errorParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['errorParams'];
+        Map.addLayer(visMosaic, { bands:'date'},'Date');
+        Map.addLayer(visMosaic, {bands:'flag'},'Landclass');
+        Map.addLayer(visMosaic, { bands:'code'},'Masked Layer');
+        Map.addLayer(visMosaic, errorParams , netOptions.errorName);
+        Map.addLayer(visMosaic, visParams , netOptions.Name);
+      break;
+    }
   }
-};
+}
 
 //  Creates the UI panels. 
 app.createPanels = function() {
@@ -1265,7 +1228,7 @@ app.createConstants = function() {
     'COPERNICUS/S2_SR': {
       name: 'S2',
       description: 'Sentinel 2A',
-      visParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+      visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['B4', 'B3', 'B2']},
       Cloudcover: 'CLOUDY_PIXEL_PERCENTAGE',
       Watercover: 'WATER_PERCENTAGE',
       VIS_OPTIONS: app.VIS_OPTIONS,
@@ -1280,7 +1243,7 @@ app.createConstants = function() {
     'LANDSAT/LC08/C01/T1_SR': {
       name: 'L8',
       description: 'LANDSAT 8',
-      visParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B4', 'B3', 'B2']},
+      visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['B4', 'B3', 'B2']},
       Cloudcover: 'CLOUD_COVER_LAND',
       Watercover: 'CLOUD_COVER',
       VIS_OPTIONS: app.VIS_OPTIONS2,
@@ -1295,7 +1258,7 @@ app.createConstants = function() {
     'users/rfernand387/L2avalidation': {
       name: 'S2_CCRS',
       description: 'Sentinel 2A CCRS',
-      visParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+      visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['B4', 'B3', 'B2']},
       Cloudcover: 'CLOUDY_PIXEL_PERCENTAGE',
       Watercover: 'WATER_PERCENTAGE',
       VIS_OPTIONS: app.VIS_OPTIONS,
@@ -1320,7 +1283,24 @@ app.createConstants = function() {
       numVariables: 6,
     },
   };
-      app.VIS_OPTIONS = {
+  app.VIS_OPTIONS = {
+    'Surface Reflectance': {
+      'COPERNICUS/S2_SR': {
+        Name: 'Surface Reflectance',
+        description: 'Surface Reflectance',
+        outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+        },
+      'LANDSAT/LC08/C01/T1_SR': {
+        Name: 'Surface Reflectance',
+        description: 'Surface Reflectance',
+        outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+        },
+      'users/rfernand387/L2avalidation': {
+        Name: 'Surface Reflectance',
+        description: 'Surface Reflectance',
+        outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+        }
+      },
     'Albedo': {
       'COPERNICUS/S2_SR': {
         Name: 'Albedo',
