@@ -1,1 +1,13 @@
-Readme
+Welcome to the LEAF-Toolbox
+
+Richard Fernandes,
+Canada Centre for Remote Sensing,
+Government of Canada 
+richard.fernandes@canada.ca
+
+To Run LEAF
+
+Earth Engine:  https://code.earthengine.google.com/?scriptPath=users%2Frfernand387%2FLEAF-Toolbox%3ALEAF-Toolbox-SL2P#
+
+Chrome Browser (region of interest specified by bounding box or view extents only): https://rfernand387.users.earthengine.app/view/leaf-toolbox
+
