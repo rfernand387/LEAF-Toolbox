@@ -1,0 +1,20 @@
+Lon,Value,Description,R,G,B,R (hex),G (hex),B (hex),Earth Engine Palette,,SL2P Network
+0,1, Temperate or sub-polar needleleaf forest,0,61,0,0,3D,0,"'003D00' , // Temperate or sub-polar needleleaf forest",,evergreen_needleaf_forest
+0,2, Sub-polar taiga needleleaf forest,148,156,112,94,9C,70,"'949C70' , // Sub-polar taiga needleleaf forest",,evergreen_needleaf_forest
+0,3, Tropical or sub-tropical broadleaf evergreen forest,0,99,0,0,63,0,"'006300' , // Tropical or sub-tropical broadleaf evergreen forest",,deciduous_broadleaf_forest
+0,4, Tropical or sub-tropical broadleaf deciduous forest,30,171,5,1E,AB,5,"'1EAB05' , // Tropical or sub-tropical broadleaf deciduous forest",,deciduous_broadleaf_forest
+0,5, Temperate or sub-polar broadleaf deciduous forest,20,140,61,14,8C,3D,"'148C3D' , // Temperate or sub-polar broadleaf deciduous forest",,deciduous_broadleaf_forest
+0,6, Mixed forest,92,117,43,5C,75,2B,"'5C752B' , // Mixed forest",,evergreen_needleaf_forest
+0,7, Tropical or sub-tropical shrubland,179,158,43,B3,9E,2B,"'B39E2B' , // Tropical or sub-tropical shrubland",,shrublands
+0,8, Temperate or sub-polar shrubland,179,138,51,B3,8A,33,"'B38A33' , // Temperate or sub-polar shrubland",,polar_shrubland
+0,9, Tropical or sub-tropical grassland,232,220,94,E8,DC,5E,"'E8DC5E' , // Tropical or sub-tropical grassland",,grassland_pasture
+0,10, Temperate or sub-polar grassland,225,207,138,E1,CF,8A,"'E1CF8A' , // Temperate or sub-polar grassland",,polar_grassland
+0,11, Sub-polar or polar shrubland-lichen-moss,156,117,84,9C,75,54,"'9C7554' , // Sub-polar or polar shrubland-lichen-moss",,polar_shrubland
+0,12, Sub-polar or polar grassland-lichen-moss,186,212,143,BA,D4,8F,"'BAD48F' , // Sub-polar or polar grassland-lichen-moss",,sphagnum_feathermoss
+0,13, Sub-polar or polar barren-lichen-moss,64,138,112,40,8A,70,"'408A70' , // Sub-polar or polar barren-lichen-moss",,lichen_feathermoss
+0,14, Wetland,107,163,138,6B,A3,8A,"'6BA38A' , // Wetland",,grassland_pasture
+0,15, Cropland,230,174,102,E6,AE,66,"'E6AE66' , // Cropland",,close_cropland
+0,16, Barren lands,168,171,174,A8,AB,AE,"'A8ABAE' , // Barren lands",,sparse_cropland
+0,17, Urban,220,33,38,DC,21,26,"'DC2126' , // Urban",,invalid
+0,18, Water,76,112,163,4C,70,A3,"'4C70A3' , // Water",,invalid
+0,19, Snow and Ice,255,250,255,FF,FA,FF,"'FFFAFF' , // Snow and Ice",,invalid
