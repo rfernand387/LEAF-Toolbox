@@ -1,9 +1,9 @@
-//  Simplified Level 2 Processor CCRS Version  
+// LEAF-Toolbox-CCRS
 //
 /* GEE Javascript implementation of the CCRS Version
- of the Simplified Level 2 Processor of Weiss and Baret (2014). 
+ of the Simplified Level 2 Processor of Weiss and Baret (2014).
 
- Input: Collection of either Landsat 5 or Landsat 7 or Landsat 8 
+ Input: Collection of Landsat 8 
         or Sentinel 2a or Sentinel 2b surface reflectance products.
 
         Imported EE asset with polygon features used to define spatial output region.
