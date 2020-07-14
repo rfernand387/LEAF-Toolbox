@@ -5,9 +5,10 @@ Canada Centre for Remote Sensing,
 Government of Canada 
 richard.fernandes@canada.ca
 
-To Run LEAF with the Simplified Level 2 Prototype Processor Algorithms (https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf).  
-For help check the Wiki.
+Select below to run LEAF with the [Simplified Level 2 Prototype Processor Algorithms](https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf).  
 
-Earth Engine:  https://code.earthengine.google.com/?scriptPath=users%2Frfernand387%2FLEAF-Toolbox%3ALEAF-Toolbox-SL2P#
+[Google Earth Engine] (https://code.earthengine.google.com/?scriptPath=users%2Frfernand387%2FLEAF-Toolbox%3ALEAF-Toolbox-SL2P#)
 
-Chrome Browser (region of interest specified by bounding box or view extents only): https://rfernand387.users.earthengine.app/view/leaf-toolbox-sl2p
+[Chrome Browser] (region of interest specified by bounding box or view extents only): https://rfernand387.users.earthengine.app/view/leaf-toolbox-sl2p)
+
+Check the wiki for help.
