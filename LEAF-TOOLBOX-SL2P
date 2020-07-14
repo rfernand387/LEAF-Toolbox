@@ -1,9 +1,6 @@
-// LEAF-Toolbox-SL2P 
-//
-/* GEE Javascript implementation of the CCRS Version
- of the Simplified Level 2 Processor of Weiss and Baret (2014).
+). 
 
- Input: Collection of Landsat 8 
+ Input: Collection of either Landsat 5 or Landsat 7 or Landsat 8 
         or Sentinel 2a or Sentinel 2b surface reflectance products.
 
         Imported EE asset with polygon features used to define spatial output region.
@@ -546,6 +543,7 @@ var wrapperNNets = function(network, filtered_col){
   return (ee.Image(filtered_col).addBands(outputBand).addBands(to_codeLayer).addBands(partition));
 };
 
+
 // sentinel 2 land mask
 var s2Mask = function(image) {
   var mask = (image.select('SCL').eq(4)).or(image.select('SCL').eq(5));
@@ -632,6 +630,7 @@ app.exportMapLayer = function() {
 
   print('in export')
   // subset collection to one image if required
+  var netOptions = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()];
   var start = app.filters.startDate.getValue();
   var end = app.filters.endDate.getValue();
   var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
@@ -781,6 +780,7 @@ app.exportMapLayer = function() {
 app.refreshMapLayer = function() {
   // clear map
   Map.clear();
+  var netOptions = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()];
 
   // subset collection to one image if required
   if (app.picker.select.getValue()) {
@@ -833,8 +833,8 @@ app.refreshMapLayer = function() {
     }
     
     // display based on parameter value
-    var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(filtered.geometry()).select(['partition'],['partition']);
-    Map.addLayer(partition, {bands:'partition',min:1, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Partition');
+    var partition = app.COLLECTION_OPTIONS[app.collectionName].partition.mosaic().clip(app.filters.mapBounds).select(['partition'],['partition']);
+    Map.addLayer(partition, {bands:'partition',min:0, max:20, palette:app.partitionPalettes.partitions.NALCMS[20]},'Land Cover');
     switch (app.vis.select.getValue()) {
       case 'Surface_Reflectance':
         // Just show a RgB composite
@@ -844,7 +844,8 @@ app.refreshMapLayer = function() {
       break;
       default:
         //apply regression to estimate parameter
-        var visMosaic = filtered.map(wrapperNNets.bind(null,app.SL2P))
+        var visMosaic = filtered.map(InvalidInput) 
+                              .map(wrapperNNets.bind(null,app.SL2P))
                               .map(wrapperNNets.bind(null,app.errorSL2P))
                               .select([ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2P.first()).id(), ee.Feature(app.COLLECTION_OPTIONS[app.collectionName].Collection_SL2Perrors.first()).id(),'code','flag','partition','date'] , [netOptions.Name , netOptions.errorName,'code','flag','partition','date'])
                               .mosaic();
@@ -853,8 +854,7 @@ app.refreshMapLayer = function() {
         var visParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['outputParams'];
         var errorParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['errorParams'];
         Map.addLayer(visMosaic, { bands:'date'},'Date');
-        Map.addLayer(visMosaic, {bands:'flag'},'Landclass');
-        Map.addLayer(visMosaic, { bands:'code'},'Masked Layer');
+        Map.addLayer(visMosaic, { bands:'code'},'Quality Code'); 
         Map.addLayer(visMosaic, errorParams , netOptions.errorName);
         Map.addLayer(visMosaic, visParams , netOptions.Name);
       break;
@@ -1175,7 +1175,7 @@ app.createConstants = function() {
       visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['B4', 'B3', 'B2']},
       Cloudcover: 'CLOUD_COVER_LAND',
       Watercover: 'CLOUD_COVER',
-      VIS_OPTIONS: app.VIS_OPTIONS2,
+      VIS_OPTIONS: app.VIS_OPTIONS,
       Collection_SL2P: ee.FeatureCollection(l8_createFeatureCollection_estimates()),
       Collection_SL2Perrors: ee.FeatureCollection(l8_createFeatureCollection_errors()),
       sl2pDomainAssetName: ee.FeatureCollection(l8_createFeatureCollection_domains()),
@@ -1480,7 +1480,7 @@ app.createConstants = function() {
         outmax: (ee.Image(ee.Array([[1000]])))
       },
       'users/rfernand387/L2avalidation': {
-        Name: 'CCC',
+        Name: 'CCC', 
         errorName: 'errorCCC',
         maskName: 'maskCCC',
         description: 'Canopy chloropyll content',
@@ -1639,4 +1639,4 @@ app.boot = function() {
 
 
 // Start app
-app.boot();
+app.boot(); 
