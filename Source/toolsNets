@@ -1,0 +1,304 @@
+ 
+// Read coefficients of a network from csv EE asset
+//
+// Should be deprecated to having a dictionary of tensor flow records
+var getCoeffs = function(netData,ind) {
+  return((ee.Feature(netData)).getNumber(ee.String('tabledata').cat(ee.Number(ind).int())));
+};
+
+var makeCodeImage = function(bandList, image){
+  var image = ee.Image(image);
+  var bandList = ee.List(bandList);
+
+   return image.select(bandList)
+                .multiply(ee.Image.constant(ee.Number(10)))
+                .ceil()
+                .mod(ee.Image.constant(ee.Number(10)))
+                .uint8()
+                .multiply(ee.ImageCollection((ee.List.sequence(0,bandList.length().subtract(1)).map( function (exponent) { return ee.Image(ee.Number(10).pow(exponent))}))).toBands())
+                .reduce('sum');
+};
+
+  
+// Adds a QC layer with first bit set if input out of domain
+var checkDomain = function(image,domainTable,netOptions){
+  
+  //Determine domain for this network
+  var domainTable = ee.Feature(domainTable)
+  var netOptions = ee.Dictionary(netOptions)
+  // netOptions is parsed in sl2p as app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()];
+  // domainTable is parsed in sl2p as ee.Feature(ee.FeatureCollection(ee.FeatureCollection(colapp.COLLECTION_OPTIONS[app.collectionName].sl2pDomainAssetName).first()).toDictionary();
+  var netDomain = ee.List.sequence(1,domainTable.size()).map(app.toolsUtils.makeList);
+  
+  //Make code image from input bands and check if they fall in the domain for this network 
+  var inp = ee.List(netOptions.inp);
+  return makeCodeImage(inp, image).remap(netDomain, ee.List.repeat(11, netDomain.length()),1,'DomainCode').rename('QC')
+
+};
+
+
+// makes combined network index and qc code layer
+var makeCodeLayer = function(landclass, list){
+  var landclass = ee.Image(landclass);
+  var bit_layer = landclass.remap(ee.List.sequence(0,list.size().subtract(1)),list,0,'remapped');
+  // print(bit_layer);
+  var qu_layer = landclass.select('code');
+  var bit = bit_layer.select(['remapped'],['flag']);
+  var code_band = ee.Image(bit.multiply(ee.Image([100]))).add(qu_layer);
+
+  return (code_band);
+};
+
+
+
+var makeBitList = function(num){
+  var n = ee.Number(num);
+  var binaryNum =ee.List.repeat(0,6);
+  for(var i=0; i<6; i++){
+    binaryNum =binaryNum.set(i,ee.Number(n.mod(2).toInt()));
+    n = n.subtract(n.mod(2)).divide(2);
+  }
+  var scale= ee.Array([1,10,100,1000,10000,100000]);
+  
+  return(ee.Array(binaryNum).dotProduct(scale));
+};
+
+
+
+  
+// Determine if inputs fall in domain of algorithm
+// Need to be updated to allow for the domain to vary with partition
+var invalidInput = function(sl2pDomain,bandList,image){
+
+  // intialize inputs
+  var image = ee.Image(image);
+  var sl2pDomain =  ee.FeatureCollection(sl2pDomain).first().toDictionary().values();
+  var bandList = ee.List(bandList).slice(3,null);
+
+  // code image bands into a single band and compare to valid codes to make QC band
+  var imageQC =  image.select(bandList,bandList)
+                              .multiply(ee.Image.constant(ee.Number(10)))
+                              .ceil()
+                              .mod(ee.Number(10))
+                              .uint8()
+                              .multiply(ee.Image.constant(ee.List.sequence(0,bandList.length().subtract(1)).map(function (value) { return ee.Number(10).pow(ee.Number(value))})))
+                              .reduce('sum')
+                              .remap(sl2pDomain, ee.List.repeat(0, sl2pDomain.length()),1)
+                              .rename('QC')
+
+  return image.addBands(imageQC);
+
+};
+
+
+//returns image with single band named networkid corresponding given 
+// input partition image remapped to networkIDs
+var makeIndexLayer = function(image,legend,Network_Ind){
+  
+  //print('make index layer')
+  var image = ee.Image(image);                        // partition image
+  var legend = ee.FeatureCollection(legend);          // legend to convert partition numbers to networks
+  var Network_Ind = ee.FeatureCollection(Network_Ind);// legend to convert networks to networkIDs
+
+  // get lists of valid partitions
+  var legend_list = legend.toList(legend.size());     
+  var landcover= legend_list.map(function(feature){return ee.Feature(feature).getNumber('Value');});
+  //print(landcover);
+  
+  // get corresponding networkIDs
+  var networkIDs = legend_list.map(function(feature){return ee.Feature(feature).get('SL2P Network');})
+                              .map(function(property){return ee.Feature(ee.FeatureCollection(Network_Ind).first()).toDictionary().getNumber(property);});
+  //print(networkIDs);
+  //print('done make index layer')
+
+  return image.remap(landcover, networkIDs, 0).rename('networkID');
+
+};
+
+
+// returns dictionary with image masked so the networkID band equals the netIndex and the corresponding network
+var selectNet = function (image,netList,inputNames,netIndex) {
+
+  var image = ee.Image(image);
+  var netList = ee.List(netList);
+  var inputNames = ee.List(inputNames);
+  var netIndex = ee.Number(netIndex).int();
+  //print(image);
+  //print(netList);
+  //print(inputNames);
+  //print(netIndex);
+  
+  var netSelected = ee.Dictionary( {
+              Image: ee.Image(image.updateMask(image.select('networkID').eq(netIndex)).select(inputNames)),
+              Network: ee.List(netList.get(netIndex)),
+      });
+  // print (netSelected);
+  //print(netSelected.get('Image'))
+  //print(netSelected.get('Network'))
+
+      return netSelected;
+
+};
+
+
+
+
+var applyNet = function(outputName,netDict) {
+  // Adds visualization band to collection
+  var outputName = ee.String(outputName);
+  var netDict = ee.Dictionary(netDict);
+  var inp = ee.Image(netDict.get('Image'));
+  var net = ee.Dictionary(netDict.get('Network'));
+
+  // Input scaling
+  var l1inp2D = inp.multiply(ee.Image(net.toArray(ee.List(['inpSlope']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([inp.bandNames()]))
+                   .add(ee.Image(net.toArray(ee.List(['inpOffset']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([inp.bandNames()]));
+
+  // Hidden layers
+  var l12D = ee.Image(net.toArray(ee.List(['h1wt']),0).reshape([ee.List(net.get('h1bi')).length(),ee.List(net.get('inpOffset')).length()]))
+              .matrixMultiply(l1inp2D.toArray().toArray(1))
+              .add(ee.Image(net.toArray(ee.List(['h1bi']),0).transpose()))
+              .arrayProject([0]).arrayFlatten([['h1w1','h1w2','h1w3','h1w4','h1w5']]);
+
+  // apply tansig 2/(1+exp(-2*n))-1
+  var l2inp2D = ee.Image(2)
+                  .divide(ee.Image(1)
+                            .add((ee.Image(-2).multiply(l12D)).exp()))
+                            .subtract(ee.Image(1));
+                            
+  // purlin hidden layers
+  var l22D = l2inp2D.multiply(ee.Image(net.toArray(ee.List(['h2wt']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([['h2w1','h2w2','h2w3','h2w4','h2w5']]))
+                    .reduce('sum')
+                    .add(ee.Image(net.toArray(ee.List(['h2bi']),0)))
+                                          .arrayProject([0])
+                                          .arrayFlatten([['h2bi']]);
+  
+  // Output scaling 
+      var outputBand = l22D.subtract(ee.Image(ee.Number(net.get('outBias'))))
+                    .divide(ee.Image(ee.Number(net.get('outSlope'))))
+                   // .rename(ee.String(net.get(net.size().subtract(1))));
+
+ // Return network output
+  return (outputBand.rename(outputName));
+};
+
+
+
+
+// Parse CSV file with list of networks for a selected variable  
+//
+// This will parse one network for each landclass partition
+var makeNetVars = function(assetName, numNets, variableNum){
+   var assetName= ee.FeatureCollection(assetName);
+   var variableNum= ee.Number(variableNum);
+   var numNets = numNets;
+   var NetsUtils = require('users/rfernand387/LEAFToolboxModules:toolsNetsUtils');
+
+
+  // get selected network 
+  var list_features = asset.flatten();
+  var filtered_features = ee.FeatureCollection(assetName.filter(ee.Filter.eq('tabledata3', variableNum))).toList(numNets);
+
+  //Features should be one feature from each class for that variable
+  //var netList = ee.List.sequence(1,landclass).map(makeNets.bind(null,filtered_features));
+  //var net = netList.add(ee.Feature(assetName.first()).id());
+  
+  return( ee.List.sequence(1,numNets).map(NetsUtils.makeNets.bind(null,filtered_features)));
+};
+
+
+
+
+var applyNet2 = function(outputName,netDict) {
+  
+  print('in apply net')
+  // Adds visualization band to collection
+  var outputName = ee.String(outputName);
+  var netDict = ee.Dictionary(netDict);
+  var inp = ee.Image(netDict.get('Image'));
+  var net = ee.Dictionary(netDict.get('Network'));
+  
+  // Input scaling
+  var l1inp2D = inp.multiply(ee.Image(net.toArray(ee.List(['inpSlope']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([inp.bandNames()]))
+                   .add(ee.Image(net.toArray(ee.List(['inpOffset']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([inp.bandNames()]));
+
+  // Hidden layers
+  var l12D = ee.Image(net.toArray(ee.List(['h1wt']),0).reshape([ee.List(net.get('h1bi')).length(),ee.List(net.get('inpOffset')).length()]))
+              .matrixMultiply(l1inp2D.toArray().toArray(1))
+              .add(ee.Image(net.toArray(ee.List(['h1bi']),0).transpose()))
+              .arrayProject([0]).arrayFlatten([['h1w1','h1w2','h1w3','h1w4','h1w5']]);
+
+  // apply tansig 2/(1+exp(-2*n))-1
+  var l2inp2D = ee.Image(2)
+                  .divide(ee.Image(1)
+                            .add((ee.Image(-2).multiply(l12D)).exp()))
+                            .subtract(ee.Image(1));
+                            
+  // purlin hidden layers
+  var l22D = l2inp2D.multiply(ee.Image(net.toArray(ee.List(['h2wt']),0).transpose())
+                                          .arrayProject([0])
+                                          .arrayFlatten([['h2w1','h2w2','h2w3','h2w4','h2w5']]))
+                    .reduce('sum')
+                    .add(ee.Image(net.toArray(ee.List(['h2bi']),0)))
+                                          .arrayProject([0])
+                                          .arrayFlatten([['h2bi']]);
+  
+  // Output scaling 
+      var outputBand = l22D.subtract(ee.Image(ee.Number(net.get('outBias'))))
+                    .divide(ee.Image(ee.Number(net.get('outSlope'))))
+                   // .rename(ee.String(net.get(net.size().subtract(1))));
+
+ // Return network output
+  return (outputBand.rename(outputName));
+};
+
+
+
+// Parse CSV file with list of networks for a selected variable  
+//
+// This will parse one network for each landclass partition
+var makeNetVars = function(asset, numNets, variableNum){
+   var asset= ee.FeatureCollection(asset);
+   var variableNum= ee.Number(variableNum);
+   var numNets = numNets;
+   var NetsUtils = require('users/rfernand387/LEAFToolboxModules:toolsNetsUtils');
+
+
+  // get selected network 
+  var list_features = asset.flatten();
+  var filtered_features = ee.FeatureCollection(asset.filter(ee.Filter.eq('tabledata3', variableNum))).toList(numNets);
+
+  //Features should be one feature from each class for that variable
+  //var netList = ee.List.sequence(1,landclass).map(makeNets.bind(null,filtered_features));
+  //var net = netList.add(ee.Feature(assetName.first()).id());
+  
+  return( ee.List.sequence(1,numNets).map(NetsUtils.makeNets.bind(null,filtered_features)));
+};
+
+
+
+
+
+exports.checkDomain = checkDomain;
+exports.makeCodeLayer = makeCodeLayer;
+exports.makeIndexLayer = makeIndexLayer;
+exports.applyNet = applyNet;
+exports.getCoeffs = getCoeffs;
+exports.makeBitList = makeBitList;
+exports.invalidInput = invalidInput;
+exports.selectNet = selectNet;
+exports.makeNetVars = makeNetVars;
+exports.applyNet2 = applyNet2;
+
+
+ 

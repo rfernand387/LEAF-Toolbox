@@ -1,0 +1,142 @@
+// convert number to string for mapping onto list
+var toString = function(number) {
+  return(ee.String(number));
+};
+
+// gets property values for a feature for mapping onto list
+var getPropertyValue = function(feature,property) {
+   var feature = ee.Feature(feature);
+   return feature.get(property);
+};
+
+// computes an power function for mapping purposes
+var power = function(base,exponent) {
+  return(base.pow(exponent));
+};
+
+// makes a table of from a list of integers  
+var makeList = function(ind){
+    //   var num = table.getNumber(ee.String('Var').cat(ee.Number(ind).int()));  This was for Camryns domains
+    return(table.getNumber(ee.String((ee.Number(ind).int()))));
+};
+
+//returns  
+var make_bitList = function(num){
+  var n = ee.Number(num);
+  var binaryNum =ee.List.repeat(0,6);
+  for(var i=0; i<6; i++){
+    binaryNum =binaryNum.set(i,ee.Number(n.mod(2).toInt()));
+    n = n.subtract(n.mod(2)).divide(2);
+  }
+  var scale= ee.Array([1,10,100,1000,10000,100000]);
+  
+  return(ee.Array(binaryNum).dotProduct(scale));
+};
+
+
+// add a 'date' band: number of days since epoch
+var addDate = function(image) {
+  var d = ee.Date(image.date()).millis().divide(86400000)
+  var days_image = ee.Image.constant(d).rename('date').toUint16().clip(image.geometry())
+  return image.addBands(days_image)
+}
+
+//computes a delta time property for an image
+var deltaTime = function(midDate,image) {
+
+  return ee.Image(image.set("deltaTime",ee.Number(image.date().millis()).subtract(ee.Number(midDate)).abs()))
+}
+
+// returns image with selected bands scaled
+var scaleBands = function(bandList,scaleList,image) {
+  
+  //print('in scaleBands')
+  var bandList = ee.List(bandList);
+  var scaleList = ee.List(scaleList);
+
+  //print(bandList)
+  //print(scaleList)
+  return(image.addBands(image.select(bandList)
+                              .multiply(ee.Image.constant(scaleList))
+                              .rename(bandList),
+          null,
+          true));
+};
+
+
+// Parse one row of CSV file for a network into a global variable
+//
+// We assume a two hidden layer network with tansig functions but
+// allow for variable nodes per layer/
+//
+// Should be deprecated to parsing tensor flow records
+var makeNets = function(feature, M) {
+  var feature = ee.List(feature);
+  var M = ee.Number(M);
+
+  // get the requested network and initialize the created network
+  var netData = ee.Feature(feature.get(M.subtract(1)));
+  var net = {};
+
+  // input slope
+  var num = ee.Number(6);
+  var start = num.add(1);
+  var end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.inpSlope = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  // input offset
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.inpOffset = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  // hidden layer 1 weight
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.h1wt = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  // hidden layer 1 bias
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.h1bi = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  // hidden layer 2 weight
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.h2wt = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+  
+  // hidden layer 2 bias
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.h2bi = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  // output slope
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.outSlope = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+  
+  // output offset
+  num = end.add(1);
+  start = num.add(1);
+  end = num.add(netData.getNumber(ee.String('tabledata').cat(ee.String(num))));
+  net.outBias = ee.List.sequence(start,end).map(getcoefs.bind(null,netData));
+
+  return(ee.Dictionary(net));
+};
+
+  
+exports.toString = toString
+exports.getPropertyValue = getPropertyValue
+exports.power = power
+exports.makeList = makeList
+exports.make_bitList = make_bitList
+exports.addDate = addDate;
+exports.deltaTime = deltaTime;
+exports.scaleBands = scaleBands;
+
+//exports.addGeometry = addGeometry;
