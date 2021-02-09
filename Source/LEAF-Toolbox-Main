@@ -1,19 +1,5 @@
-/**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var geometry = 
-    /* color: #d63000 */
-    /* displayProperties: [
-      {
-        "type": "rectangle"
-      }
-    ] */
-    ee.Geometry.Polygon(
-        [[[-78.23710937500002, 45.571522866313764],
-          [-78.23710937500002, 44.890669280812986],
-          [-76.65507812500002, 44.890669280812986],
-          [-76.65507812500002, 45.571522866313764]]], null, false);
-/***** End of imports. If edited, may not auto-convert in the playground. *****/
-// LEAF-Toolbox-SL2P
-//   
+// LEAF-Toolbox-SL2P 
+//    
 /* GEE Javascript implementation of the   
    Simplified Level 2 Processor of Weiss and Baret (2016). 
 
@@ -58,7 +44,11 @@ var geometry =
 /* Region of interest , optional                                                  */
 /*--------------------------------------------------------------------------------*/
 
-//var table = ee.FeatureCollection('users/hemitshah/Envelope_LCC')
+//var table = ee.FeatureCollection('users/ganghong/TilesSampling_Belmanip');
+//print(table)
+//Map.addLayer(table)
+//table = table.map(function (feature) { return(feature.buffer(-10000))});
+//print(table)
 //var featureNumber = ee.Number(0);
 //var geometry = ee.FeatureCollection(ee.Feature(table.toList(table.size()).get(featureNumber))).geometry();
 
@@ -70,7 +60,7 @@ var geometry =
 // applies a set of shallow networks to an image based on a provided partition image band
 var wrapperNNets = function(network, partition, netOptions, colOptions, suffixName, imageInput){
   
-  //print('wrappernets');
+  //print('wrappernets')
 
   // typecast function parameters
   var network = ee.List(network);
@@ -81,7 +71,7 @@ var wrapperNNets = function(network, partition, netOptions, colOptions, suffixNa
   var imageInput = ee.Image(imageInput);
   //print(network)
   //print(partition)
-  //print(netOptions)
+  //print(netVariable)
   //print(colOptions)
   //print(suffixName)et
   //print(imageInput)
@@ -91,7 +81,7 @@ var wrapperNNets = function(network, partition, netOptions, colOptions, suffixNa
 
   // determine networks based on collection
   var netList = ee.List(network.get(ee.Number(netOptions.variable).subtract(1))); 
-  print(netList);
+  //print(netList);
 
   // parse land cover into network index and add to input image
   imageInput = imageInput.addBands(app.Nets.makeIndexLayer(partition,colOptions.legend,colOptions.Network_Ind));
@@ -241,9 +231,10 @@ app.exportMapLayer = function() {
   var start = app.filters.startDate.getValue();
   var end = app.filters.endDate.getValue();
   var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
+  var filtered = [];
   if (app.picker.allImages.getValue()) {
     // filter collection for all products 
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+    filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
                       .filterBounds(app.filters.mapBounds)
                       .filterDate(start[0], end[0])
                       .filterMetadata(colOptions.Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
@@ -255,15 +246,15 @@ app.exportMapLayer = function() {
     }
   else {
     // process selected image only 
-    var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+    filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
                       .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
                       .map(app.Utils.addDate)
                       .map(function(image){return image.clip(app.filters.mapBounds)})
                       .map(app.Utils.deltaTime.bind(null,midDate))
                       .sort('deltaTime');
     }
-    print('filtered')
-    print(filtered)
+    print('filtered');
+    print(filtered);
     // mask based on collection, add score fo quality mosaicing and angles
     switch (app.filters.selectCollection.getValue()) {
       case  'COPERNICUS/S2_SR':
@@ -297,11 +288,12 @@ app.exportMapLayer = function() {
           break;
         }
       
-      print('starting exports')
+      print('starting exports');
+      var export_umage = [];
       // Export data
       switch(app.exportID){
         case 'Image by Image':
-          var export_image = ExportCol(filtered, 'Image_Export', exportRes,"unsigned int16",100);
+          export_image = ExportCol(filtered, 'Image_Export', exportRes,"unsigned int16",100);
         break;
         case 'Full Map Mosaic':
           filtered = filtered.qualityMosaic('spec_score');
@@ -348,13 +340,13 @@ app.exportMapLayer = function() {
       //print(estimateSL2P)
       var uncertaintySL2P = scaledFiltered.map(wrapperNNets.bind(null,app.errorsSL2P,partition, netOptions, colOptions,'error'))
       //print(uncertaintySL2P);
-      print('done sl2p')
+      print('done sl2p');
       
-      print('starting exports')
+      print('starting exports');
       // Export data
       switch(app.exportID){
         case 'Image by Image':
-          var export_image = ExportCol(scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P), 'Image_Export', exportRes,"unsigned int16",100);
+          export_image = ExportCol(scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P), 'Image_Export', exportRes,"unsigned int16",100);
         break;
         case 'Full Map Mosaic':
           mosaicBounds = app.filters.mapBounds.intersection(scaledFiltered.qualityMosaic('spec_score').geometry());
@@ -382,15 +374,18 @@ app.refreshMapLayer = function() {
   Map.clear();
   var colOptions = app.COLLECTION_OPTIONS[app.collectionName];
   var netOptions = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()];
-
+  // print("colOptions", colOptions);
+  //print("netOptions",netOptions);
+  
   // subset collection to one image if required
   if (app.picker.select.getValue()) {
     var start = app.filters.startDate.getValue();
     var end = app.filters.endDate.getValue();
     var midDate = ee.Number(start[0]).add(ee.Number(end[0])).divide(2);
+    var filtered = [];
     if (app.picker.allImages.getValue()) {
       // filter collection for all products 
-      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+      filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
                     .filterBounds(app.filters.mapBounds)
                     .filterDate(start[0], end[0])
                     .filterMetadata(colOptions.Cloudcover,'less_than',app.filters.maxCloudcover.getValue())
@@ -403,7 +398,7 @@ app.refreshMapLayer = function() {
     }
     else {
       // process selected image only 
-      var filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
+      filtered =  ee.ImageCollection(app.filters.selectCollection.getValue())
                     .filter(ee.Filter.eq('system:index',app.picker.select.getValue()))
                     .map(app.Utils.addDate)
                     .map(function(image){return image.clip(app.filters.mapBounds)})
@@ -411,15 +406,15 @@ app.refreshMapLayer = function() {
                     .sort('deltaTime');
   
     }
-    print('filtered')
-    print(filtered)
+
+
     // mask based on collection, add score fo quality mosaicing and angles
     switch (app.filters.selectCollection.getValue()) {
       case  'COPERNICUS/S2_SR':
         filtered =  filtered.map(app.S2.s2MaskClear).map(app.toolsMosaic.addSpecScore.bind(null,midDate)).map(app.S2.addS2Geometry.bind(null,colOptions));
       break;
       case  'LANDSAT/LC08/C01/T1_SR': 
-        filtered = filtered.map(app.L8.l08MaskClear);
+        filtered = filtered.map(app.L8.l08MaskClear).map(app.toolsMosaic.addSpecScore.bind(null,midDate)).map(app.L8.addL8Geometry.bind(null,colOptions));
       break;
       case  'users/rfernand387/L2avalidation': 
         filtered = filtered.map(app.S2.ccrsSentinel2).map(app.S2.s2MaskClear).map(app.toolsMosaic.addSpecScore.bind(null,midDate)).map(app.S2.addS2Geometry.bind(null,colOptions));
@@ -427,7 +422,6 @@ app.refreshMapLayer = function() {
       default: print('Invalid collection');
       break;
     }
-
     // display based on parameter value
     switch (app.vis.select.getValue()) {
       case 'Surface_Reflectance':
@@ -467,23 +461,24 @@ app.refreshMapLayer = function() {
       }
     
       //apply regression to estimate parameter
-      print('starting sl2p')
+      print('starting sl2p');
       var partition = colOptions.partition.filterBounds(app.filters.mapBounds).mosaic().clip(app.filters.mapBounds).rename('partition');
-      print(partition)
+      print(partition);
+       //     var scaledFiltered2 = app.Utils.scaleBands2(netOptions.inputBands,netOptions.inputScaling,filtered.first())
+
       var scaledFiltered = filtered.map(app.Utils.scaleBands.bind(null,netOptions.inputBands,netOptions.inputScaling))
-                          .map(app.Nets.invalidInput.bind(null,colOptions.sl2pDomain,netOptions.inputBands))
+                          .map(app.Nets.invalidInput.bind(null,colOptions.sl2pDomain,netOptions.inputBands));
       //print(scaledFiltered)
-      //var estimateSL2P = scaledFiltered.map(wrapperNNets.bind(null,app.SL2P,partition, netOptions, colOptions,'estimate'))
-      var estimateSL2P = ee.ImageCollection(wrapperNNets(app.SL2P,partition, netOptions, colOptions,'estimate',scaledFiltered.first()))
+      //Map.addLayer(scaledFiltered,  colOptions.visParams  , 'Surface_Reflectance');
+      var estimateSL2P = scaledFiltered.map(wrapperNNets.bind(null,app.SL2P,partition, netOptions, colOptions,'estimate'));
       //print(estimateSL2P)
-      var uncertaintySL2P = scaledFiltered.map(wrapperNNets.bind(null,app.errorsSL2P,partition, netOptions, colOptions,'error'))
-      //var uncertaintySL2P = ee.ImageCollection(wrapperNNets(app.errorsSL2P,partition, netOptions, colOptions,'error',scaledFiltered.first()))
+      var uncertaintySL2P = scaledFiltered.map(wrapperNNets.bind(null,app.errorsSL2P,partition, netOptions, colOptions,'error'));
       //print(uncertaintySL2P);
       
       // Mosaic after processing each product
       var mosaicResult = scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P).qualityMosaic('spec_score').clip(app.filters.mapBounds).select(['date','QC','estimate'+netOptions.Name,'error'+netOptions.Name,'networkID','partition']);
       //print(mosaicResult)
-      print('done sl2p')
+      print('done sl2p');
 
       //Displays the Collection of filtered images with the vis parameters 
       var visParams = app.VIS_OPTIONS[app.vis.select.getValue()][app.filters.selectCollection.getValue()]['outputParams'];
@@ -584,6 +579,7 @@ app.createPanels = function() {
           var geo = geometry;
           app.filters.mapBounds = geo;
           Map.centerObject(geo);
+          Map.addLayer(geo);
         }
         //app.refreshMapLayer;
       }
@@ -783,8 +779,8 @@ app.createConstants = function() {
     // load modules
   app.toolsMosaic = require('users/rfernand387/LEAFToolboxModules:toolsMosaic');
   app.batch = require('users/fitoprincipe/geetools:batch');
-  //app.network = require('users/rfernand387/LEAFToolboxModules:SL2PNetworkv2');
-  app.network = require('users/rfernand387/LEAFToolboxModules:SL2PNetworkOneNet');
+  // This was camryns networks that are now not supported.  RF Feb 2021 app.network = require('users/rfernand387/Leaf-Toolbox-Working:SL2PNetworkOneNet');
+  app.network = require('users/rfernand387/LEAFToolboxModules:SL2PNetworkv3');
   app.Utils = require('users/rfernand387/LEAFToolboxModules:toolsUtils');
   app.Nets = require('users/rfernand387/LEAFToolboxModules:toolsNets');
   app.NetsUtils = require('users/rfernand387/LEAFToolboxModules:toolsNetsUtils');
@@ -819,7 +815,7 @@ app.createConstants = function() {
       Network_Ind: ee.FeatureCollection(app.network.s2_createFeatureCollection_Network_Ind()),
       partition: ee.ImageCollection(app.network.s2_createImageCollection_partition()),
       legend:  ee.FeatureCollection(app.network.s2_createFeatureCollection_legend()),
-      numVariables: 6,
+      numVariables: 7,
     },
     'LANDSAT/LC08/C01/T1_SR': {
       name: 'L8',
@@ -838,7 +834,7 @@ app.createConstants = function() {
       Network_Ind: ee.FeatureCollection(app.network.l8_createFeatureCollection_Network_Ind()),
       partition: ee.ImageCollection(app.network.l8_createImageCollection_partition()),
       legend:  ee.FeatureCollection(app.network.l8_createFeatureCollection_legend()),
-      numVariables: 6,
+      numVariables: 7,
     },
     'users/rfernand387/L2avalidation': {
       name: 'S2_CCRS',
@@ -857,28 +853,16 @@ app.createConstants = function() {
       Network_Ind: ee.FeatureCollection(app.network.s2_createFeatureCollection_Network_Ind()),
       partition: ee.ImageCollection(app.network.s2_createImageCollection_partition()),
       legend:  ee.FeatureCollection(app.network.s2_createFeatureCollection_legend()),
-      numVariables: 6,
+      numVariables: 7,
     },  
   }; 
-  app.ALG_OPTIONS = {
-    'SL2P': {
-      name: 'SL2P',
-      description: 'Simplified Level 2 Processor',
-      numVariables: 6,
-    },
-    'SL2P-D': {
-      name: 'SL2P-D',
-      description: 'Simplified Level 2 Processor - Distributed',
-      numVariables: 6,
-    },
-  };
   app.VIS_OPTIONS = {
     'Surface_Reflectance': {
       'COPERNICUS/S2_SR': {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
         outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
-        inp:      [ 'B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inp:      [ 'B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         },
       'LANDSAT/LC08/C01/T1_SR': {
         Name: 'Surface_Reflectance',
@@ -890,7 +874,7 @@ app.createConstants = function() {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
         outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
-        inp:      [ 'B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inp:      [ 'B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         }
       },
     'Albedo': {
@@ -928,7 +912,7 @@ app.createConstants = function() {
         variable: 6,
         outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -943,7 +927,7 @@ app.createConstants = function() {
         variable: 2,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -969,7 +953,7 @@ app.createConstants = function() {
         variable: 2,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -985,7 +969,7 @@ app.createConstants = function() {
         variable: 3,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]]))) 
@@ -1011,7 +995,7 @@ app.createConstants = function() {
         variable: 3,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))  
@@ -1026,10 +1010,10 @@ app.createConstants = function() {
         variable: 1,
         outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
         errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
-        outmax: (ee.Image(ee.Array([[1]]))) 
+        outmax: (ee.Image(ee.Array([[100]]))) 
       },
       'LANDSAT/LC08/C01/T1_SR': {
         Name: 'LAI',
@@ -1052,7 +1036,7 @@ app.createConstants = function() {
         variable: 1,
         outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
         errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]]))) 
@@ -1068,7 +1052,7 @@ app.createConstants = function() {
         variable: 4,
         outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
         errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1000]])))
@@ -1094,7 +1078,7 @@ app.createConstants = function() {
         variable: 4,
         outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
         errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1000]])))
@@ -1110,7 +1094,7 @@ app.createConstants = function() {
         variable: 5,
         outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
         errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[100]])))
@@ -1136,23 +1120,23 @@ app.createConstants = function() {
         variable: 5,
         outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
         errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[100]])))
       },
 
     },
-/*      'DASF' : {
+      'DASF' : {
       'COPERNICUS/S2_SR': {
-        name: 'DASF',
+        Name: 'DASF',
         errorname: 'errorDASF',
         maskname: 'maskDASF',
         description: 'Canopy directional scattering factor',
         variable: 7,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[2]])))
@@ -1171,19 +1155,22 @@ app.createConstants = function() {
         outmax: (ee.Image(ee.Array([[2]])))
       },   
       'users/rfernand387/L2avalidation': {
-        name: 'DASF',
+        Name: 'DASF',
         errorname: 'errorDASF',
         maskname: 'maskDASF',
         description: 'Canopy directional scattering factor',
         variable: 7,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[2]])))
       },
-    },*/
+
+
+
+    },
     };
 
 
