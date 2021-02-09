@@ -72,7 +72,8 @@ var invalidInput = function(sl2pDomain,bandList,image){
 
   // intialize inputs
   var image = ee.Image(image);
-  var sl2pDomain =  ee.FeatureCollection(sl2pDomain).first().toDictionary().values();
+  // This was for old version of domain files , does not work now ! RF Feb 2021 var sl2pDomain =  ee.FeatureCollection(sl2pDomain).first().toDictionary().values();
+  var sl2pDomain = ee.FeatureCollection(sl2pDomain).aggregate_array("DomainCode").sort()
   var bandList = ee.List(bandList).slice(3,null);
 
   // code image bands into a single band and compare to valid codes to make QC band
@@ -90,7 +91,28 @@ var invalidInput = function(sl2pDomain,bandList,image){
 
 };
 
+var invalidInput2 = function(sl2pDomain,bandList,image){
 
+  // intialize inputs
+  var image = ee.Image(image);
+  // This was for old version of domain files , does not work now ! RF Feb 2021 var sl2pDomain =  ee.FeatureCollection(sl2pDomain).first().toDictionary().values();
+  var sl2pDomain = ee.FeatureCollection(sl2pDomain).aggregate_array("DomainCode")
+  var bandList = ee.List(bandList).slice(3,null);
+  print('sl2pdomain',sl2pDomain)
+  // code image bands into a single band and compare to valid codes to make QC band
+  var imageQC =  image.select(bandList,bandList)
+                              .multiply(ee.Image.constant(ee.Number(10)))
+                              .ceil()
+                              .mod(ee.Number(10))
+                              .uint8()
+                              .multiply(ee.Image.constant(ee.List.sequence(0,bandList.length().subtract(1)).map(function (value) { return ee.Number(10).pow(ee.Number(value))})))
+                              .reduce('sum')
+                              .remap(sl2pDomain, ee.List.repeat(0, sl2pDomain.length()),1)
+                              .rename('QC')
+
+  return image.addBands(imageQC);
+
+};
 //returns image with single band named networkid corresponding given 
 // input partition image remapped to networkIDs
 var makeIndexLayer = function(image,legend,Network_Ind){
@@ -298,6 +320,7 @@ exports.makeBitList = makeBitList;
 exports.invalidInput = invalidInput;
 exports.selectNet = selectNet;
 exports.makeNetVars = makeNetVars;
+exports.invalidInput2 = invalidInput2;
 exports.applyNet2 = applyNet2;
 
 
