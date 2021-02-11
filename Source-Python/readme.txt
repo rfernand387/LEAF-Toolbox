@@ -10,7 +10,6 @@ You will need an Anaconda environment configured as:
 >>conda install -c conda-forge jupyterlab
 >>conda install -c conda-forge earthengine-api
 >>conda install -c conda-forge folium
->>pip install geetools
 
 Then run as follows:
 >Anaconda
