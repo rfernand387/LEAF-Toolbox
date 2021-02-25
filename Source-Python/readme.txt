@@ -7,6 +7,7 @@ You will need an Anaconda environment configured as:
 
 >Anaconda
 >>conda create --name leaftoolbox
+>>conda activate leaftoolbox
 >>conda install -c conda-forge jupyterlab
 >>conda install -c conda-forge earthengine-api
 >>conda install -c conda-forge folium
