@@ -7,10 +7,11 @@ You will need an Anaconda environment configured as:
 
 >Anaconda
 >>conda create --name leaftoolbox
->>conda activate leaftoolbox
->>conda install -c conda-forge jupyterlab
->>conda install -c conda-forge earthengine-api
->>conda install -c conda-forge folium
+>>conda activate leaftoolbox 
+>>conda install -c conda-forge jupyterlab -y
+>>conda install -c conda-forge earthengine-api -y
+>>conda install -c conda-forge folium -y
+>conda install -c conda-forge matplotlib -y
 
 Then run as follows:
 >Anaconda
