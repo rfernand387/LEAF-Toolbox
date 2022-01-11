@@ -336,23 +336,23 @@ app.exportMapLayer = function() {
       var scaledFiltered = filtered.map(app.Utils.scaleBands.bind(null,netOptions.inputBands,netOptions.inputScaling))
                           .map(app.Nets.invalidInput.bind(null,colOptions.sl2pDomain,netOptions.inputBands))
       //print(scaledFiltered)
-      var estimateSL2P = scaledFiltered.map(wrapperNNets.bind(null,app.SL2P,partition, netOptions, colOptions,'estimate'))
+      var estimateSL2P = scaledFiltered.map(wrapperNNets.bind(null,app.SL2P,partition, netOptions, colOptions,'estimate')).map( function (image) { return image.select(['estimate'+netOptions.Name]).multiply(1000).addBands(image.select(['networkID','partition']))})
       //print(estimateSL2P)
-      var uncertaintySL2P = scaledFiltered.map(wrapperNNets.bind(null,app.errorsSL2P,partition, netOptions, colOptions,'error'))
+      var uncertaintySL2P = scaledFiltered.map(wrapperNNets.bind(null,app.errorsSL2P,partition, netOptions, colOptions,'error')).map( function (image) { return image.select(['error'+netOptions.Name]).multiply(1000).addBands(image.select(['networkID','partition']))})
       //print(uncertaintySL2P);
-      print('done sl2p');
+      print('done sl2p') 
       
-      print('starting exports');
+      print('starting exports')
       // Export data
       switch(app.exportID){
         case 'Image by Image':
-          export_image = ExportCol(scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P), 'Image_Export', exportRes,"unsigned int16",100);
+          var export_image = ExportCol(scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P), 'Image_Export', exportRes,"unsigned int16",100);
         break;
         case 'Full Map Mosaic':
-          mosaicBounds = app.filters.mapBounds.intersection(scaledFiltered.qualityMosaic('spec_score').geometry());
-          scaledFiltered = scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P).clip(mosaicBounds).qualityMosaic('spec_score').select(['date','QC','estimate'+netOptions.Name,'error'+netOptions.Name,'networkID','partition']);
+          var mosaicBounds = app.filters.mapBounds.intersection(scaledFiltered.qualityMosaic('spec_score').geometry(),10);
+          scaledFiltered = scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P).qualityMosaic('spec_score').clip(mosaicBounds).select(['date','QC','estimate'+netOptions.Name,'error'+netOptions.Name,'networkID','partition']);
           Export.image.toDrive({
-               image:  scaledFiltered.toUnit16(),
+               image:  scaledFiltered.toUint16(),
                description:app.collectionName.replace('/','_') + "_" + start[0] + "_" + end[0] + "_" + app.vis.select.getValue(),
                folder: app.folder[0],
                scale:exportRes,
