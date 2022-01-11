@@ -5,7 +5,8 @@ Canada Centre for Remote Sensing,
 Government of Canada 
 richard.fernandes@canada.ca
 
-If you are new to LEAF consider erading the [[wiki | https://github.com/rfernand387/LEAF-Toolbox/wiki]]
+If you are new to LEAF consider reading the [[wiki | https://github.com/rfernand387/LEAF-Toolbox/wiki]]
+
 Select below to run LEAF with the [[Simplified Level 2 Prototype Processor Algorithms | https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf ]] 
 
 [[Run LEAF in Google Earth Engine | https://code.earthengine.google.com/7c9d2d3d0f0e907e8522db90f8c7b016]]
@@ -19,12 +20,4 @@ DOI 10.5281/zenodo.4321297.
 Check the wiki for help.  If you just want data products for Canada please check here as well.
 
 
-[[LAI FGP metadata|https://gcgeo.gc.ca/geonetwork/metadata/eng/37745ea7-d0cf-4ef6-b6b8-1cb3a7fce0b8#]]
-
-[[LAI DataCube Viewer|https://datacube.services.geo.ca/en/viewer/eo4ce/vegetation/lai.html]]
-
-
-[[FCOVER FGP metadata|https://gcgeo.gc.ca/geonetwork/metadata/eng/b352a71a-011e-4a8e-b97c-77eae5ed3226#]]
-
-[[FCOVER DataCube Viewer | https://datacube.services.geo.ca/en/viewer/eo4ce/vegetation/fcover.html]]
 
