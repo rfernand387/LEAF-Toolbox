@@ -77,8 +77,8 @@ var applySL2P = function(inputCollection,outputName) {
   
   // Import Modules
   var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries');  // 
-  var ib = require('users/richardfernandes/SL2P:image-bands');
-  var wn = require('users/richardfernandes/SL2P:wrapper-nets');
+  var ib = require('users/richardfernandes/SL2P:imageBands');
+  var wn = require('users/richardfernandes/SL2P:wrapperNets');
 
   // Identify Collection and make dictionary for parameters
   var collectionName = input_collection.get('system:id')
