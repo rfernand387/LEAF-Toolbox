@@ -1,2 +1,0 @@
-GEE Code Editor source required to apply SL2P.
-The main function is SL2P.js with in line documentation.
