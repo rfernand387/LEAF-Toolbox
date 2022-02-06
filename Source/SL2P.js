@@ -35,7 +35,7 @@
 // Usage: 
 //
 //    // Sentinel 2 Example
-//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries'); // Specify collection and algorithms
+//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P'); // Specify collection and algorithms
 //    var S2 = require('users/richardfernandes/SL2P:toolsS2')                     // Cloud masking and geometry
 //    var collectionName = 'COPERNICUS/S2_SR'
 //    var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));
@@ -50,7 +50,7 @@
 //    Map.addLayer(output_collection.select('estimateLAI').max());
 //
 //    // Landsat 8 example
-//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries');  // Specify collection and algorithms
+//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P');  // Specify collection and algorithms
 //    var L08 = require('users/richardfernandes/SL2P:toolsL08');                   // Cloud masking and geometry
 //    var collectionName = 'LANDSAT_LC08_C02_T1_L2'
 //    var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));
@@ -76,7 +76,7 @@ var applySL2P = function(inputCollection,outputName) {
   var mapBounds = inputCollection.geometry();
   
   // Import Modules
-  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries');  // 
+  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P');  // 
   var ib = require('users/richardfernandes/SL2P:imageBands');
   var wn = require('users/richardfernandes/SL2P:wrapperNets');
 
