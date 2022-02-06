@@ -3,7 +3,7 @@
 var make_collection_options = function() {
 
   
-var fc = require('users/richardfernandes/SL2P:feature-collections');
+var fc = require('users/richardfernandes/SL2P:constructFeatureCollectionsSL2P');
 var COLLECTION_OPTIONS =  {
     'COPERNICUS/S2_SR': {
       name: 'S2',
