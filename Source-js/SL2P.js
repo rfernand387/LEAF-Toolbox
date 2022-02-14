@@ -34,54 +34,53 @@
 //
 // Usage: 
 //
-//    // Sentinel 2 Example
-//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P'); // Specify collection and algorithms
-//    var S2 = require('users/richardfernandes/SL2P:toolsS2')                     // Cloud masking and geometry
-//    var collectionName = 'COPERNICUS/S2_SR'
-//    var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));
-//    var mapBounds= ee.Geometry.Polygon( [[[-75, 45],[-75, 46], [-74, 46],  [-74, 45]]]);
-//    var input_collection = ee.ImageCollection(collectionName)
-//                           .filterBounds(mapBounds) 
-//                           .filterDate('2018-08-01', '2018-09-30') 
-//                          .map(S2.S2MaskClear)                                  // Clear sky snow free  land mask
-//                          .map(S2.addS2Geometry.bind(null,colOptions))          // Adds geometry bands using metadata
-//    var output_collection = applySL2P(input_collection,'LAI');
-//    Map.centerObject(output_collection);
-//    Map.addLayer(output_collection.select('estimateLAI').max());
+// Sentinel 2 or Landsat 8 Example (other Landsat sensors require different neural networks not in public distribution)
+// You probably want to stretch the final display for visibility 
+// Change paramater from LAI to whichever you want
+// 
+// var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries'); // Specify collection and algorithms
+// var S2 = require('users/richardfernandes/SL2P:toolsS2')                     // Cloud masking and geometry for S2
+// var L08 = require('users/richardfernandes/SL2P:toolsL08');                   // Cloud masking and geometry for L08
+// var ib = require('users/richardfernandes/SL2P:imageBands')                     // Cloud masking and geometry
+// var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Cloud masking and geometry
 //
-//    // Landsat 8 example
-//    var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P');  // Specify collection and algorithms
-//    var L08 = require('users/richardfernandes/SL2P:toolsL08');                   // Cloud masking and geometry
-//    var collectionName = 'LANDSAT_LC08_C02_T1_L2'
-//    var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));
-//    var mapBounds= ee.Geometry.Polygon( [[[-75, 45],[-75, 46], [-74, 46],  [-74, 45]]]);
-//    var input_collection = ee.ImageCollection(collectionName)
+// var collectionName = 'COPERNICUS/S2_SR'                                     // Uncomment for S2
+// //var collectionName = 'LANDSAT_LC08_C02_T1_L2'                               // Uncomment for L08
+
+//var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));  //dictionaries describing sensors and bands for networks
+//var mapBounds= ee.Geometry.Polygon( [[[-75, 45],[-75, 46], [-74, 46],  [-74, 45],[-75,45]]]);   // change to your geometry
+//var input_collection = ee.ImageCollection(collectionName)
 //                           .filterBounds(mapBounds) 
-//                           .filterDate('2018-08-01', '2018-09-30') 
-//                          .map(L08.L08MaskClear)                                // Clear sky snow free  land mask
-//                          .map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata
-//    var output_collection = applySL2P(input_collection,'LAI');
-//    Map.centerObject(output_collection);
-//    Map.addLayer(output_collection.select('estimateLAI').max());
+//                           .filterDate('2020-08-01', '2020-08-30')              // All scenes for 1 month
+//                           .map(L08.L08MaskClear)                                // Clear sky snow free  land mask, uncomment for S2
+//                           .map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for S2
+//                         //.map(L08.L08MaskClear)                                // Clear sky snow free  land mask , uncomemnt for L08
+//                         //.map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for L08
+//
+//var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,'LAI')); // will process ALL input scenes
+//Map.centerObject(input_collection);                           // Focus map centre
+//Map.addLayer(output_collection.select('estimateLAI').max());  // We use maximum value composite for demonstration
+//
 //
 // Richard Fernandes, Canada Centre for Remote Sensing, 2022, DOI 10.5281/zenodo.4321297.
 // Distributed under  https://open.canada.ca/en/open-government-licence-canada
 //
 
 var applySL2P = function(inputCollection,outputName) {
-  inputCollection = ee.ImageCollection(input_collection);
-  outputName = ee.String(outputName);
+  inputCollection = ee.ImageCollection(inputCollection);
+  print('Input Collection:',inputCollection)
+  print('Output Variable:',outputName)
   
   // bounds for land cover map
   var mapBounds = inputCollection.geometry();
   
   // Import Modules
-  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionariesSL2P');  // 
-  var ib = require('users/richardfernandes/SL2P:imageBands');
+  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries');  // 
+  var ib = require('users/richardfernandes/SL2P:image-bands');
   var wn = require('users/richardfernandes/SL2P:wrapperNets');
 
   // Identify Collection and make dictionary for parameters
-  var collectionName = input_collection.get('system:id')
+  var collectionName = inputCollection.get('system:id')
   var collectionOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));
   var netOptions = ee.Dictionary(ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_net_options()).get(outputName)).get(collectionName));
 
@@ -94,12 +93,16 @@ var applySL2P = function(inputCollection,outputName) {
   var partition = ee.ImageCollection(collectionOptions.get("partition")).filterBounds(mapBounds).mosaic().clip(mapBounds).rename('partition');
 
   // Pre process input imagery and flag invalid inputs
-  var scaled_input_collection = input_collection.map(function (image) { return ib.scaleBands(netOptions.get("inputBands"),netOptions.get("inputScaling"),image)}) 
+  var scaled_inputCollection = inputCollection.map(function (image) { return ib.scaleBands(netOptions.get("inputBands"),netOptions.get("inputScaling"),image)}) 
                                             .map(function (image) { return ib.invalidInput(ee.FeatureCollection(collectionOptions.get("sl2pDomain")),netOptions.get("inputBands"),image)});
-  
+
   // Apply networks to produce mapped parameters
-  var estimateSL2P = scaled_input_collection.map(function (image) { return wn.wrapperNNets(SL2P, partition, netOptions, collectionOptions, "estimate", image, outputName)});
-  var uncertaintySL2P = scaled_input_collection.map(function (image) { return wn.wrapperNNets(errorsSL2P, partition, netOptions, collectionOptions, "error", image, outputName)});
+  var estimateSL2P = scaled_inputCollection.map(function (image) { return wn.wrapperNNets(SL2P, partition, netOptions, collectionOptions, "estimate", image, outputName)});
+  //print('calling WN')
+  //var image = scaled_inputCollection.first();
+  //var estimateSL2P = wn.wrapperNNets(SL2P, partition, netOptions, collectionOptions, "estimate", image, outputName);
+  //print(estimateSL2P)
+  var uncertaintySL2P = scaled_inputCollection.map(function (image) { return wn.wrapperNNets(errorsSL2P, partition, netOptions, collectionOptions, "error", image, outputName)});
 
   // Scale and offset mapped parameter bands
   estimateSL2P = estimateSL2P.map(function (image) { return image.addBands({srcImg: image.select("estimate"+outputName).multiply(ee.Image.constant(netOptions.get("outputScale")).add(ee.Image.constant(netOptions.get("outputOffset")))), overwrite: true})});
@@ -108,3 +111,6 @@ var applySL2P = function(inputCollection,outputName) {
   // Return the estimate and uncertainty images
   return(estimateSL2P.combine(uncertaintySL2P));
 };
+exports.applySL2P = applySL2P;
+
+
