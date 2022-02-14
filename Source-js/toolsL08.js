@@ -39,7 +39,6 @@ var addL08Geometry = function(colOptions,image) {
   return image.addBands(ee.Image.constant(0).multiply(3.1415).divide(180).cos().rename(['cosVZA']))
               .addBands(sza .multiply(3.1415).divide(180).cos().rename(['cosSZA']))
               .addBands(image.metadata(colOptions.get("saa")).subtract(image.metadata(colOptions.get("saa"))).multiply(3.1415).divide(180).cos().rename(['cosRAA']))
-              .addBands(image.select('date'));
 }
 exports.L08MaskClear = L08MaskClear;
 exports.L08MaskLand = L08MaskLand;
