@@ -1,4 +1,4 @@
-// Dictionaries for SL2P
+// Dictionaries for SL2P - CCRS
 
 var make_collection_options = function() {
 
