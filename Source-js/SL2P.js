@@ -13,7 +13,7 @@
 // The input collection. One of:
 //
 // "COPERNICUS_S2_SR"
-// "LANDSAT_LC08_C02_T1_L2"
+// "LANDSAT/LC08/C02/T1_L2"
 //
 // outputName (String)
 // The name of the output biophysical variable.  One of:
@@ -45,15 +45,15 @@
 // var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Cloud masking and geometry
 //
 // var collectionName = 'COPERNICUS/S2_SR'                                     // Uncomment for S2
-// //var collectionName = 'LANDSAT_LC08_C02_T1_L2'                               // Uncomment for L08
+// //var collectionName = "LANDSAT/LC08/C02/T1_L2"                               // Uncomment for L08
 
 //var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));  //dictionaries describing sensors and bands for networks
 //var mapBounds= ee.Geometry.Polygon( [[[-75, 45],[-75, 46], [-74, 46],  [-74, 45],[-75,45]]]);   // change to your geometry
 //var input_collection = ee.ImageCollection(collectionName)
 //                           .filterBounds(mapBounds) 
 //                           .filterDate('2020-08-01', '2020-08-30')              // All scenes for 1 month
-//                           .map(L08.L08MaskClear)                                // Clear sky snow free  land mask, uncomment for S2
-//                           .map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for S2
+//                           .map(S2.S2MaskClear)                                // Clear sky snow free  land mask, uncomment for S2
+//                           .map(S2.addS2Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for S2
 //                         //.map(L08.L08MaskClear)                                // Clear sky snow free  land mask , uncomemnt for L08
 //                         //.map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for L08
 //
