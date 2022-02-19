@@ -2,7 +2,7 @@
 //
 // Simplified Level 2 Prototype Processor
 // 
-// Appies the Simplified Level 2 Prototype Processor (https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf). ) 
+// Applies the Simplified Level 2 Prototype Processor (https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf). ) 
 //to satellite image collections to  produce Level 2b products of vegetation biophysical variables.  
 //
 // Usage:
@@ -13,7 +13,7 @@
 // The input collection. One of:
 //
 // "COPERNICUS_S2_SR"
-// "LANDSAT/LC08/C02/T1_L2"
+// "LANDSAT_LC08_C02_T1_L2"
 //
 // outputName (String)
 // The name of the output biophysical variable.  One of:
@@ -34,33 +34,11 @@
 //
 // Usage: 
 //
-// Sentinel 2 or Landsat 8 Example (other Landsat sensors require different neural networks not in public distribution)
-// You probably want to stretch the final display for visibility 
-// Change paramater from LAI to whichever you want
-// 
-// var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries'); // Specify collection and algorithms
-// var S2 = require('users/richardfernandes/SL2P:toolsS2')                     // Cloud masking and geometry for S2
-// var L08 = require('users/richardfernandes/SL2P:toolsL08');                   // Cloud masking and geometry for L08
-// var ib = require('users/richardfernandes/SL2P:imageBands')                     // Cloud masking and geometry
-// var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Cloud masking and geometry
+// var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Specify collection and algorithms
+// var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,'LAI')); // will process ALL input scenes
 //
-// var collectionName = 'COPERNICUS/S2_SR'                                     // Uncomment for S2
-// //var collectionName = "LANDSAT/LC08/C02/T1_L2"                               // Uncomment for L08
-
-//var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));  //dictionaries describing sensors and bands for networks
-//var mapBounds= ee.Geometry.Polygon( [[[-75, 45],[-75, 46], [-74, 46],  [-74, 45],[-75,45]]]);   // change to your geometry
-//var input_collection = ee.ImageCollection(collectionName)
-//                           .filterBounds(mapBounds) 
-//                           .filterDate('2020-08-01', '2020-08-30')              // All scenes for 1 month
-//                           .map(S2.S2MaskClear)                                // Clear sky snow free  land mask, uncomment for S2
-//                           .map(S2.addS2Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for S2
-//                         //.map(L08.L08MaskClear)                                // Clear sky snow free  land mask , uncomemnt for L08
-//                         //.map(L08.addL08Geometry.bind(null,colOptions))        // Adds geometry bands using metadata, uncomment for L08
-//
-//var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,'LAI')); // will process ALL input scenes
-//Map.centerObject(input_collection);                           // Focus map centre
-//Map.addLayer(output_collection.select('estimateLAI').max());  // We use maximum value composite for demonstration
-//
+// The input collection must be augmented with aquisition Geometry bands.
+// To see how this is done check out users/richardfernandes/SL2P/example-SL2P
 //
 // Richard Fernandes, Canada Centre for Remote Sensing, 2022, DOI 10.5281/zenodo.4321297.
 // Distributed under  https://open.canada.ca/en/open-government-licence-canada
@@ -75,7 +53,7 @@ var applySL2P = function(inputCollection,outputName) {
   var mapBounds = inputCollection.geometry();
   
   // Import Modules
-  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries');  // 
+  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries-SL2P');  // 
   var ib = require('users/richardfernandes/SL2P:image-bands');
   var wn = require('users/richardfernandes/SL2P:wrapperNets');
 
@@ -112,5 +90,4 @@ var applySL2P = function(inputCollection,outputName) {
   return(estimateSL2P.combine(uncertaintySL2P));
 };
 exports.applySL2P = applySL2P;
-
 
