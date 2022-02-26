@@ -886,7 +886,7 @@ app.createConstants = function() {
         variable: 6,
         outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
