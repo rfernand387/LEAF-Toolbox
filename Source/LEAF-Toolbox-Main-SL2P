@@ -873,7 +873,7 @@ app.createConstants = function() {
         variable: 6,
         outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -899,7 +899,7 @@ app.createConstants = function() {
         variable: 6,
         outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -914,7 +914,7 @@ app.createConstants = function() {
         variable: 2,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -940,7 +940,7 @@ app.createConstants = function() {
         variable: 2,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))
@@ -956,7 +956,7 @@ app.createConstants = function() {
         variable: 3,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]]))) 
@@ -982,7 +982,7 @@ app.createConstants = function() {
         variable: 3,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]])))  
@@ -997,7 +997,7 @@ app.createConstants = function() {
         variable: 1,
         outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
         errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]]))) 
@@ -1023,7 +1023,7 @@ app.createConstants = function() {
         variable: 1,
         outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
         errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1]]))) 
@@ -1039,7 +1039,7 @@ app.createConstants = function() {
         variable: 4,
         outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
         errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1000]])))
@@ -1065,7 +1065,7 @@ app.createConstants = function() {
         variable: 4,
         outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
         errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[1000]])))
@@ -1081,7 +1081,7 @@ app.createConstants = function() {
         variable: 5,
         outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
         errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[100]])))
@@ -1107,7 +1107,7 @@ app.createConstants = function() {
         variable: 5,
         outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
         errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[100]])))
@@ -1123,7 +1123,7 @@ app.createConstants = function() {
         variable: 7,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[2]])))
@@ -1149,7 +1149,7 @@ app.createConstants = function() {
         variable: 7,
         outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
         errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outmin: (ee.Image(ee.Array([[0]]))),
         outmax: (ee.Image(ee.Array([[2]])))
