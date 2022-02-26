@@ -1,9 +1,10 @@
-// Dictionaries for SL2P
+// Dictionaries for SL2P - no bugs
+// Richard Fernandes
 
 var make_collection_options = function() {
 
   
-var fc = require('users/richardfernandes/SL2P:constructFeatureCollectionsSL2P');
+var fc = require('users/richardfernandes/SL2P:feature-collections-SL2P');
 var COLLECTION_OPTIONS =  {
     'COPERNICUS/S2_SR': {
       name: 'S2',
@@ -45,7 +46,7 @@ var COLLECTION_OPTIONS =  {
 
 return(COLLECTION_OPTIONS);
 
-};
+}; 
 
 var make_net_options = function() {
 
@@ -56,13 +57,13 @@ var NET_OPTIONS = {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
         outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
-        inp:      [ 'B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inp:      [ 'B1','B2','B3','B4', 'B5', 'B6', 'B7', 'B8','B8A','B9','B10','B11','B12'],
         },
-      'LANDSAT/LC08/C01/T1_SR': {
+      'LANDSAT/LC08/C02/T1_L2': {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
         outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['SR_B7', 'SR_B6', 'SR_B4']},
-        inp:      [ 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'SR_B8A','SR_B9','SR_B11','SR_B12'],
+        inp:      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
         },
       },
     'Albedo': {
@@ -72,7 +73,7 @@ var NET_OPTIONS = {
         maskName: 'maskAlbedo',
         description: 'Black sky albedo',
         variable: 6,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 1,
@@ -100,7 +101,7 @@ var NET_OPTIONS = {
         maskName: 'maskfAPAR',
         description: 'Fraction of absorbed photosynthetically active radiation',
         variable: 2,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 1,
@@ -128,7 +129,7 @@ var NET_OPTIONS = {
         maskName: 'maskfCOVER',
         description: 'Fraction of canopy cover',
         variable: 3,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 1,
@@ -156,7 +157,7 @@ var NET_OPTIONS = {
         maskName: 'maskLAI',
         description: 'Leaf area index',
         variable: 1,
-          inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 15,
@@ -184,7 +185,7 @@ var NET_OPTIONS = {
         maskName: 'maskCCC',
         description: 'Canopy chloropyll content',
         variable: 4,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 1500,
@@ -212,7 +213,7 @@ var NET_OPTIONS = {
         maskName: 'maskCWC',
         description: 'Canopy water content',
         variable: 5,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 15,
@@ -240,7 +241,7 @@ var NET_OPTIONS = {
         maskname: 'maskDASF',
         description: 'Canopy directional scattering factor',
         variable: 7,
-        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B4', 'B5', 'B6', 'B7', 'B8A','B9','B11','B12'],
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
         outputMin: 0,
         outputMax: 1,
