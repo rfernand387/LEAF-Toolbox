@@ -11,11 +11,6 @@ Fernandes, R. et al., 2021, "LEAF Toolbox", Canada Centre for Remote Sensing, ht
 
 If you are new to LEAF consider reading the wiki for this repository (https://github.com/rfernand387/LEAF-Toolbox/wiki)
 
-Select below to run LEAF with the Simplified Level 2 Prototype Processor Algorithms (https://step.esa.int/docs/extra/ATBD_S2ToolBox_L2B_V1.1.pdf). 
-
-Google Earth Engine: https://code.earthengine.google.com/7c9d2d3d0f0e907e8522db90f8c7b016
-Chrome Browser (region of interest specified by bounding box or view extents only): https://rfernand387.users.earthengine.app/view/leaf-toolbox
-
 
 - Who will use this project?
 
