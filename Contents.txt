@@ -1,0 +1,10 @@
+/Documents		            Written material
+/Inputs			              Neural network files exported from Matlab for LEAF toolbox
+/bugFixes		              Additional code to verify bug fixes identrified in issues
+/Source-Python-GBOV       Python source to perform validation in GEE using LEAF-toolbox.  Not mean for release
+/source  		              Stable release of GEE JS leaf toolbox with GUI
+/source-js 		            Stable release of GE JS leaf toolbox function (no GUI) 
+/source-python/Source                Original leaf toolbox deployed as  a notebook (not stable, was used for a research paper)
+/source-python/Source-with-Modules   Stable release Pyhton Leaf toolbox solution with a jupyutern notebool
+
+If you just want to run LEAF in GEE use /source-js
