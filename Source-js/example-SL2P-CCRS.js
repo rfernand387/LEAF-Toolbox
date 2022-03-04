@@ -31,6 +31,6 @@ switch (collectionName) {
 
 //  Apply processor for a selected variable
 var varName = 'LAI'
-var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,varName)); // will process ALL input scenes
+var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,varName, dictionariesSL2P)); // will process ALL input scenes
 Map.centerObject(input_collection);                           // Focus map centre
 Map.addLayer(output_collection.select('estimateLAI').max());  // We use maximum value composite for demonstration
