@@ -1,4 +1,4 @@
-// Dictionaries for SL2P - no bugs
+// Dictionaries for SL2P-CCRS - no bugs
 // Richard Fernandes
 
 var make_collection_options = function() {
@@ -16,12 +16,13 @@ var COLLECTION_OPTIONS =  {
       vza: 'MEAN_INCIDENCE_ZENITH_ANGLE_B8A',
       saa: 'MEAN_SOLAR_AZIMUTH_ANGLE', 
       vaa: 'MEAN_INCIDENCE_AZIMUTH_ANGLE_B8A',
-      Collection_SL2P: ee.FeatureCollection(fc.s2_createFeatureCollection_estimates()),
-      Collection_SL2Perrors: ee.FeatureCollection(fc.s2_createFeatureCollection_errors()),  
-      sl2pDomain: ee.FeatureCollection(fc.s2_createFeatureCollection_domains()),
-      Network_Ind: ee.FeatureCollection(fc.s2_createFeatureCollection_Network_Ind()),
-      partition: ee.ImageCollection(fc.s2_createImageCollection_partition()),
-      legend:  ee.FeatureCollection(fc.s2_createFeatureCollection_legend()),
+      VIS_OPTIONS: app.VIS_OPTIONS,
+      Collection_SL2P: ee.FeatureCollection(app.network.s2_createFeatureCollection_estimates()),
+      Collection_SL2Perrors: ee.FeatureCollection(app.network.s2_createFeatureCollection_errors()),  
+      sl2pDomain: ee.FeatureCollection(app.network.s2_createFeatureCollection_domains()),
+      Network_Ind: ee.FeatureCollection(app.network.s2_createFeatureCollection_Network_Ind()),
+      partition: ee.ImageCollection(app.network.s2_createImageCollection_partition()),
+      legend:  ee.FeatureCollection(app.network.s2_createFeatureCollection_legend()),
       numVariables: 7,
     },
     'LANDSAT/LC08/C02/T1_L2': {
@@ -30,18 +31,19 @@ var COLLECTION_OPTIONS =  {
       visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['SR_B4', 'SR_B3', 'SR_B2']},
       Cloudcover: 'CLOUD_COVER_LAND',
       Watercover: 'CLOUD_COVER',
-      sza: 'SUN_ELEVATION',  // will be converted to zenith angle later
-      vza: 'SUN_ELEVATION', // dummy value
-      saa: 'SUN_AZIMUTH', 
-      vaa: 'SUN_AZIMUTH',
-      Collection_SL2P: ee.FeatureCollection(fc.l8_createFeatureCollection_estimates()),
-      Collection_SL2Perrors: ee.FeatureCollection(fc.l8_createFeatureCollection_errors()),
-      sl2pDomain: ee.FeatureCollection(fc.l8_createFeatureCollection_domains()),
-      Network_Ind: ee.FeatureCollection(fc.l8_createFeatureCollection_Network_Ind()),
-      partition: ee.ImageCollection(fc.l8_createImageCollection_partition()),
-      legend:  ee.FeatureCollection(fc.l8_createFeatureCollection_legend()),
+      sza: 'SZA',
+      vza: 'VZA',
+      saa: 'SAA', 
+      vaa: 'VAA',
+      VIS_OPTIONS: app.VIS_OPTIONS,
+      Collection_SL2P: ee.FeatureCollection(app.network.l8_createFeatureCollection_estimates()),
+      Collection_SL2Perrors: ee.FeatureCollection(app.network.l8_createFeatureCollection_errors()),
+      sl2pDomain: ee.FeatureCollection(app.network.l8_createFeatureCollection_domains()),
+      Network_Ind: ee.FeatureCollection(app.network.l8_createFeatureCollection_Network_Ind()),
+      partition: ee.ImageCollection(app.network.l8_createImageCollection_partition()),
+      legend:  ee.FeatureCollection(app.network.l8_createFeatureCollection_legend()),
       numVariables: 7,
-    }
+    },
   };
 
 return(COLLECTION_OPTIONS);
@@ -51,8 +53,7 @@ return(COLLECTION_OPTIONS);
 var make_net_options = function() {
 
 var NET_OPTIONS = {
-  
-  'Surface_Reflectance': {
+    'Surface_Reflectance': {
       'COPERNICUS/S2_SR': {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
@@ -62,9 +63,15 @@ var NET_OPTIONS = {
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
-        outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['SR_B7', 'SR_B6', 'SR_B4']},
+        outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['SR_B4', 'SR_B3', 'SR_B2']},
         inp:      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
         },
+      'users/rfernand387/L2avalidation': {
+        Name: 'Surface_Reflectance',
+        description: 'Surface_Reflectance',
+        outpuParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
+        inp:      [ 'B1','B2','B3','B4', 'B5', 'B6', 'B7', 'B8','B8A','B9','B10','B11','B12'],
+        }
       },
     'Albedo': {
       'COPERNICUS/S2_SR': {
@@ -73,12 +80,13 @@ var NET_OPTIONS = {
         maskName: 'maskAlbedo',
         description: 'Black sky albedo',
         variable: 6,
+        outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'Albedo',
@@ -86,12 +94,27 @@ var NET_OPTIONS = {
         maskName: 'maskAlbedo',
         description: 'Black sky albedo',
         variable: 6,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
+      },
+      'users/rfernand387/L2avalidation': {
+        Name: 'Albedo',
+        errorName: 'errorAlbedo',
+        maskName: 'maskAlbedo',
+        description: 'Black sky albedo',
+        variable: 6,
+        outputParams: { min: 0.1, max: 0.3, palette: app.palettes.misc.jet[7], bands: ['estimateAlbedo']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorAlbedo']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
       },
     },
     'fAPAR': {
@@ -101,12 +124,13 @@ var NET_OPTIONS = {
         maskName: 'maskfAPAR',
         description: 'Fraction of absorbed photosynthetically active radiation',
         variable: 2,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'fAPAR',
@@ -114,13 +138,29 @@ var NET_OPTIONS = {
         maskName: 'maskfAPAR',
         description: 'Fraction of absorbed photosynthetically active radiation',
         variable: 2,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]]))) 
       },
+      'users/rfernand387/L2avalidation': {
+        Name: 'fAPAR',
+        errorName: 'errorfAPAR',
+        maskName: 'maskfAPAR',
+        description: 'Fraction of absorbed photosynthetically active radiation',
+        variable: 2,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefAPAR']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfAPAR']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
+      },
+      
     },
     'fCOVER': {
       'COPERNICUS/S2_SR': {
@@ -129,12 +169,13 @@ var NET_OPTIONS = {
         maskName: 'maskfCOVER',
         description: 'Fraction of canopy cover',
         variable: 3,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]]))) 
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'fCOVER',
@@ -142,12 +183,27 @@ var NET_OPTIONS = {
         maskName: 'maskfCOVER',
         description: 'Fraction of canopy cover',
         variable: 3,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))
+      },
+      'users/rfernand387/L2avalidation': {
+        Name: 'fCOVER',
+        errorName: 'errorfCOVER',
+        maskName: 'maskfCOVER',
+        description: 'Fraction of canopy cover',
+        variable: 3,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimatefCOVER']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorfCOVER']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]])))  
       },
     },
     'LAI': {
@@ -157,12 +213,13 @@ var NET_OPTIONS = {
         maskName: 'maskLAI',
         description: 'Leaf area index',
         variable: 1,
+        outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
+        errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 15,
-        outputScale: 1000,
-        outputOffset: 0 
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]]))) 
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'LAI',
@@ -170,13 +227,29 @@ var NET_OPTIONS = {
         maskName: 'maskLAI',
         description: 'Leaf area index',
         variable: 1,
+        outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
+        errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 15,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[10]])))
       },
+      'users/rfernand387/L2avalidation': {
+        Name: 'LAI',
+        errorName: 'errorLAI',
+        maskName: 'maskLAI',
+        description: 'Leaf area index',
+        variable: 1,
+        outputParams: { min: 0, max: 10, palette: app.palettes.misc.jet[7], bands: ['estimateLAI']},
+        errorParams: { min: -5, max: 5, palette: app.palettes.misc.jet[7], bands: ['errorLAI']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1]]))) 
+      },
+
     },
     'CCC': {
       'COPERNICUS/S2_SR': {
@@ -185,12 +258,13 @@ var NET_OPTIONS = {
         maskName: 'maskCCC',
         description: 'Canopy chloropyll content',
         variable: 4,
+        outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
+        errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1500,
-        outputScale: 10,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1000]])))
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'CCC',
@@ -198,13 +272,29 @@ var NET_OPTIONS = {
         maskName: 'maskCCC',
         description: 'Canopy chloropyll content',
         variable: 4,
+        outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
+        errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1500,
-        outputScale: 10,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1000]])))
       },
+      'users/rfernand387/L2avalidation': {
+        Name: 'CCC', 
+        errorName: 'errorCCC',
+        maskName: 'maskCCC',
+        description: 'Canopy chloropyll content',
+        variable: 4,
+        outputParams: { min: 0, max: 1000, palette: app.palettes.misc.jet[7], bands: ['estimateCCC']},
+        errorParams: { min: -500, max: 500, palette: app.palettes.misc.jet[7], bands: ['errorCCC']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[1000]])))
+      },
+
     },
      'CWC': {
        'COPERNICUS/S2_SR': {
@@ -213,12 +303,13 @@ var NET_OPTIONS = {
         maskName: 'maskCWC',
         description: 'Canopy water content',
         variable: 5,
+        outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
+        errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 15,
-        outputScale: 1000,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[100]])))
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'CWC',
@@ -226,13 +317,29 @@ var NET_OPTIONS = {
         maskName: 'maskCWC',
         description: 'Canopy water content',
         variable: 5,
+        outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
+        errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 15,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[100]]))) 
       },   
+      'users/rfernand387/L2avalidation': {
+        Name: 'CWC',
+        errorName: 'errorCWC',
+        maskName: 'maskCWC',
+        description: 'Canopy water content',
+        variable: 5,
+        outputParams: { min: 0, max: 100, palette: app.palettes.misc.jet[7], bands: ['estimateCWC']},
+        errorParams: { min: -50, max: 50, palette: app.palettes.misc.jet[7], bands: ['errorCWC']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[100]])))
+      },
+
     },
       'DASF' : {
       'COPERNICUS/S2_SR': {
@@ -241,12 +348,13 @@ var NET_OPTIONS = {
         maskname: 'maskDASF',
         description: 'Canopy directional scattering factor',
         variable: 7,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
         inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
         inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[2]])))
       },
       'LANDSAT/LC08/C02/T1_L2': {
         Name: 'DASF',
@@ -254,15 +362,30 @@ var NET_OPTIONS = {
         maskName: 'maskDASF',
         description: 'Canopy directional scattering factor',
         variable: 7,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
         inputBands:      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-        inputScaling:     [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-        outputMin: 0,
-        outputMax: 1,
-        outputScale: 1000,
-        outputOffset: 0
+        inputScaling:     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+        inputOffset:     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[2]])))
       },   
+      'users/rfernand387/L2avalidation': {
+        Name: 'DASF',
+        errorname: 'errorDASF',
+        maskname: 'maskDASF',
+        description: 'Canopy directional scattering factor',
+        variable: 7,
+        outputParams: { min: 0, max: 1, palette: app.palettes.misc.jet[7], bands: ['estimateDASF']},
+        errorParams: { min: -1, max: 1, palette: app.palettes.misc.jet[7], bands: ['errorDASF']},
+        inputBands:      [ 'cosVZA','cosSZA','cosRAA','B3','B4', 'B5', 'B6', 'B7', 'B8A','B11','B12'],
+        inputScaling:      [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+        inputOffset:     [0,0,0,0,0,0,0,0],
+        outmin: (ee.Image(ee.Array([[0]]))),
+        outmax: (ee.Image(ee.Array([[2]])))
+      },
     },
-};
+  };
 
 
 return(NET_OPTIONS);
