@@ -4,7 +4,7 @@
 // import dictionaries needed to pre process both S2 and L08 data
 var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries-SL2P-CCRS'); // Specify collection and algorithms
 var S2 = require('users/richardfernandes/SL2P:toolsS2')                     // Cloud masking and geometry for S2
-var L08 = require('users/richardfernandes/SL2P:toolsL08');                   // Cloud masking and geometry for L08
+var L08 = require('users/richardfernandes/SL2P:toolsL8');                   // Cloud masking and geometry for L08
 var ib = require('users/richardfernandes/SL2P:imageBands')                     // Cloud masking and geometry
 var SL2P = require('users/richardfernandes/SL2P:SL2P-CCRS')                     // Cloud masking and geometry
 
