@@ -8,8 +8,7 @@ var ib = require('users/richardfernandes/SL2P:imageBands')                     /
 var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Cloud masking and geometry
 
 // chose a collection
-//var collectionName = "COPERNICUS/S2_SR"                                    // Uncomment for S2
-var collectionName = "LANDSAT/LC08/C02/T1_L2"                               // Uncomment for L08
+var collectionName = "COPERNICUS/S2_SR"                                    // Uncomment for S2
 
 // filter images based on you mapBouds, date range and then preprocess
 var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));  //dictionaries describing sensors and bands for networks
