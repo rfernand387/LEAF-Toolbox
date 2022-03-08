@@ -25,6 +25,8 @@
 // 'CWC' - canopy water content
 // 'CCC' - canopy chloropyll content
 // DASF' - directional area scattering factor
+//
+// dictionariesSL2P - dictionary that specifies algorithms
 ////
 // Returns: ImageCollection
 //
@@ -35,7 +37,8 @@
 // Usage: 
 //
 // var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Specify collection and algorithms
-// var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,'LAI')); // will process ALL input scenes
+// var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries-SL2P')  //Specify the dictionaru 
+// var output_collection = ee.ImageCollection(SL2P.applySL2P(input_collection,'LAI',dictionariesSL2P)); // will process ALL input scenes
 //
 // The input collection must be augmented with aquisition Geometry bands.
 // To see how this is done check out users/richardfernandes/SL2P/example-SL2P
@@ -44,16 +47,14 @@
 // Distributed under  https://open.canada.ca/en/open-government-licence-canada
 //
 
-var applySL2P = function(inputCollection,outputName) {
+var applySL2P = function(inputCollection,outputName, dictionariesSL2P) { 
   inputCollection = ee.ImageCollection(inputCollection);
-  print('Input Collection:',inputCollection)
-  print('Output Variable:',outputName)
-  
+  print('sl2p')
+
   // bounds for land cover map
-  var mapBounds = inputCollection.geometry();
-  
+  var mapBounds = inputCollection.map(function (image) { return image.unmask()}).union().geometry();
+
   // Import Modules
-  var dictionariesSL2P = require('users/richardfernandes/SL2P:dictionaries-SL2P');  // 
   var ib = require('users/richardfernandes/SL2P:image-bands');
   var wn = require('users/richardfernandes/SL2P:wrapperNets');
 
@@ -68,18 +69,14 @@ var applySL2P = function(inputCollection,outputName) {
   var errorsSL2P = ee.List.sequence(1,ee.Number(collectionOptions.get("numVariables")),1).map(function (netNum) { return  wn.makeNetVars(collectionOptions.get("Collection_SL2Perrors"),numNets,netNum)});
 
   // Get partition used to select network
-  var partition = ee.ImageCollection(collectionOptions.get("partition")).filterBounds(mapBounds).mosaic().clip(mapBounds).rename('partition');
+  var partition = ee.ImageCollection(collectionOptions.get("partition")).filterBounds(mapBounds).max().clip(mapBounds).rename('partition');
 
   // Pre process input imagery and flag invalid inputs
   var scaled_inputCollection = inputCollection.map(function (image) { return ib.scaleBands(netOptions.get("inputBands"),netOptions.get("inputScaling"),image)}) 
                                             .map(function (image) { return ib.invalidInput(ee.FeatureCollection(collectionOptions.get("sl2pDomain")),netOptions.get("inputBands"),image)});
-
+  
   // Apply networks to produce mapped parameters
   var estimateSL2P = scaled_inputCollection.map(function (image) { return wn.wrapperNNets(SL2P, partition, netOptions, collectionOptions, "estimate", image, outputName)});
-  //print('calling WN')
-  //var image = scaled_inputCollection.first();
-  //var estimateSL2P = wn.wrapperNNets(SL2P, partition, netOptions, collectionOptions, "estimate", image, outputName);
-  //print(estimateSL2P)
   var uncertaintySL2P = scaled_inputCollection.map(function (image) { return wn.wrapperNNets(errorsSL2P, partition, netOptions, collectionOptions, "error", image, outputName)});
 
   // Scale and offset mapped parameter bands
@@ -87,7 +84,7 @@ var applySL2P = function(inputCollection,outputName) {
   uncertaintySL2P = uncertaintySL2P.map(function (image) { return image.addBands({ srcImg: image.select("error"+outputName).multiply(ee.Image.constant(netOptions.get("outputScale")).add(ee.Image.constant(netOptions.get("outputOffset")))), overwrite: true})});
   
   // Return the estimate and uncertainty images
-  return(estimateSL2P.combine(uncertaintySL2P));
+  return(estimateSL2P.combine(uncertaintySL2P).combine(scaled_inputCollection.select('QC')));
 };
 exports.applySL2P = applySL2P;
 
