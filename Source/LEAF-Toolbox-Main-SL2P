@@ -334,7 +334,7 @@ app.exportMapLayer = function() {
         case 'Full Map Mosaic':
           var mosaicBounds = app.filters.mapBounds.intersection(scaledFiltered.qualityMosaic('spec_score').geometry(),10);
           scaledFiltered = scaledFiltered.select(['date','QC','spec_score']).combine(estimateSL2P).combine(uncertaintySL2P).qualityMosaic('spec_score').clip(mosaicBounds).select(['date','QC','estimate'+netOptions.Name,'error'+netOptions.Name,'networkID','partition']);
-          var mosaicName = mosaic
+          var mosaicName = "mosaic"
           Export.image.toDrive({
                image:  scaledFiltered.toUint16(),
                description:mosaicName+ "_" + start[0] + "_" + end[0] + "_" + app.vis.select.getValue(),
