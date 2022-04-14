@@ -189,13 +189,6 @@ var ExportCol = function(col, folder, scale, type, nimg, maxPixels) {
                      "double":img.toDouble(),
                      "unsigned int32":img.toUint32()
                     };
-
-        print(imgtype[type])
-        print(id)
-        print(app.folder[0])
-        print(scale)
-        print(imgBounds)
-        print(app.pixels[0])
       // export image for map bounds only using desired type
       Export.image.toDrive({
         image:imgtype[type],
@@ -287,7 +280,7 @@ app.exportMapLayer = function() {
         case 'Full Map Mosaic':
           filtered = filtered.qualityMosaic('spec_score');
           filtered = filtered.clip(app.filters.mapBounds.intersection(filtered.geometry(),10));
-          var mosaicName = mosaic
+          var mosaicName = "mosaic"
           Export.image.toDrive({
                image:  filtered.toUint16(),
                description:mosaicName+ "_" + start[0] + "_" + end[0] + "_" + app.vis.select.getValue(),
