@@ -4,7 +4,7 @@ var make_collection_options = function() {
   
 var fc = require('users/richardfernandes/SL2P:feature-collections-SL2P-CCRS');
 var COLLECTION_OPTIONS =  {
-    'COPERNICUS/S2_SR': {
+    'COPERNICUS/S2_SR_HARMONIZED': {
       name: 'S2',
       description: 'Sentinel 2A',
       visParams: {gamma: 1.3, min: 0, max: 3000, bands: ['B4', 'B3', 'B2']},
@@ -51,7 +51,7 @@ var make_net_options = function() {
 var NET_OPTIONS = {
   
   'Surface_Reflectance': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'Surface_Reflectance',
         description: 'Surface_Reflectance',
         outputParams: {gamma: 1.3, min: 0, max: 0.3, bands: ['B7', 'B6', 'B4']},
@@ -65,7 +65,7 @@ var NET_OPTIONS = {
         },
       },
     'Albedo': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'Albedo',
         errorName: 'errorAlbedo',
         maskName: 'maskAlbedo',
@@ -93,7 +93,7 @@ var NET_OPTIONS = {
       },
     },
     'fAPAR': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'fAPAR',
         errorName: 'errorfAPAR',
         maskName: 'maskfAPAR',
@@ -121,7 +121,7 @@ var NET_OPTIONS = {
       },
     },
     'fCOVER': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'fCOVER',
         errorName: 'errorfCOVER',
         maskName: 'maskfCOVER',
@@ -149,7 +149,7 @@ var NET_OPTIONS = {
       },
     },
     'LAI': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'LAI',
         errorName: 'errorLAI',
         maskName: 'maskLAI',
@@ -177,7 +177,7 @@ var NET_OPTIONS = {
       },
     },
     'CCC': {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'CCC',
         errorName: 'errorCCC',
         maskName: 'maskCCC',
@@ -205,7 +205,7 @@ var NET_OPTIONS = {
       },
     },
      'CWC': {
-       'COPERNICUS/S2_SR': {
+       'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'CWC',
         errorName: 'errorCWC',
         maskName: 'maskCWC',
@@ -233,7 +233,7 @@ var NET_OPTIONS = {
       },   
     },
       'DASF' : {
-      'COPERNICUS/S2_SR': {
+      'COPERNICUS/S2_SR_HARMONIZED': {
         Name: 'DASF',
         errorname: 'errorDASF',
         maskname: 'maskDASF',
