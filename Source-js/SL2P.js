@@ -12,7 +12,7 @@
 // collection (FeatureCollection):
 // The input collection. One of:
 //
-// "COPERNICUS_S2_SR"
+// "COPERNICUS_S2_SR_HARMONIZED"
 // "LANDSAT_LC08_C02_T1_L2"
 //
 // outputName (String)
