@@ -8,7 +8,7 @@ var ib = require('users/richardfernandes/SL2P:imageBands')                     /
 var SL2P = require('users/richardfernandes/SL2P:SL2P')                     // Cloud masking and geometry
 
 // chose a collection
-var collectionName = "COPERNICUS/S2_SR"                                    // Uncomment for S2
+var collectionName = "COPERNICUS/S2_SR_HARMONIZED"                                    // Uncomment for S2
 
 // filter images based on you mapBouds, date range and then preprocess
 var colOptions = ee.Dictionary(ee.Dictionary(dictionariesSL2P.make_collection_options()).get(collectionName));  //dictionaries describing sensors and bands for networks
@@ -17,7 +17,7 @@ var input_collection = ee.ImageCollection(collectionName)
                            .filterBounds(mapBounds) 
                            .filterDate('2020-08-01', '2020-08-30')  
 switch (collectionName) {
-  case "COPERNICUS/S2_SR":
+  case "COPERNICUS/S2_SR_HARMONIZED":
     input_collection = input_collection.map(S2.S2MaskClear)                                // Clear sky snow free  land mask, uncomment for S2
                                        .map(S2.addS2Geometry.bind(null,colOptions))
   break;
