@@ -1,3 +1,1 @@
-Performs validation using in=situ data by calling SL2P with modules.
-
-Richard
+Leaf toolbox source used for validation.  Will eventually be moved to source-python modules when stable.
