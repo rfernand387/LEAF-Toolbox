@@ -1,10 +1,13 @@
 # Dictionaries for SL2P
 # Richard Fernandes
 
+import ee 
+
 def make_collection_options(fc): 
 
     # import featurecollectionsSL2P as fc
-    
+    import ee
+
     COLLECTION_OPTIONS = {
         # Sentinel 2 using 20 m bands:
         'COPERNICUS/S2_SR_HARMONIZED': {
@@ -67,6 +70,8 @@ def make_collection_options(fc):
     return(COLLECTION_OPTIONS)
 
 def make_net_options():
+
+    import ee 
 
     NET_OPTIONS = {
         'Surface_Reflectance': {
