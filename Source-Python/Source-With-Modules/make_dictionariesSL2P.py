@@ -6,6 +6,7 @@ import ee
 def make_collection_options(fc): 
 
     # import featurecollectionsSL2P as fc
+    print("here in file")
     import ee
 
     COLLECTION_OPTIONS = {
