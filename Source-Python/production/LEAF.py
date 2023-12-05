@@ -126,6 +126,18 @@ def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,buff
 
     return  sampleFeature
 
+# add dictionary of sampled values from product to a feature
+def getCollection(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSize,outputScale,startDate,endDate,filterSize,factor=1):
+    
+    # Buffer features is requested
+    if ( bufferSize > 0 ):
+        site = ee.Feature(site).buffer(bufferSize)
+    else:
+        site = ee.Feature(site)        
+    
+    return makeProductCollection(collectionOptions,networkOptions,variable,site.geometry(),startDate,endDate,maxCloudcover,outputScale,filterSize)
+
+
 #format samples into a data frame
 def samplestoDF(sampleFeature):
 
@@ -143,7 +155,7 @@ def samplestoDF(sampleFeature):
 #sample features for LEAF output
 def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=0,filterSize=0,scaleSize=30,bufferSize=0,deltaTime=[0,0],subsamplingFraction=1):
     
-    print('\nSTARTING LEAF SITE\n ')
+    print('\nSTARTING LEAF IMAGE for ',imageCollectionName,'\n ')
 
     outputDictionary = {}
     collectionOptions = (dictionariesSL2P.make_collection_options(algorithm))
@@ -184,4 +196,51 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
         
         outputDictionary.update({input: result})
         print('\nDONE LEAF SITE\n')
+    return outputDictionary
+
+
+#sample features for LEAF output
+def imageSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=0,filterSize=0,scaleSize=30,bufferSize=0,deltaTime=[0,0],subsamplingFraction=1):
+    
+    print('\nSTARTING LEAF IMAGE for ',imageCollectionName,'\n ')
+
+    outputDictionary = {}
+    collectionOptions = (dictionariesSL2P.make_collection_options(algorithm))
+    networkOptions= dictionariesSL2P.make_net_options()
+    for input in siteList:
+        
+        #Convert the feature collection to a list so we can apply SL2P on features in sequence to avoid time outs on GEE
+        sampleRecords =  ee.FeatureCollection(input).sort('system:time_start', False).map(lambda feature: feature.set('timeStart',feature.get('system:time_start')))
+        sampleRecords =  sampleRecords.toList(sampleRecords.size())
+        print('Site: ',input, ' with ',sampleRecords.size().getInfo(), ' features.')
+        result = []
+        for n in range(0,sampleRecords.size().getInfo()) : 
+
+            # select feature to process
+            
+            site = ee.Feature(sampleRecords.get(n))
+
+            # get start and end date for this feature
+            startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).advance(deltaTime[0],'day').getInfo()['value']/1000)
+            endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1],'day').getInfo()['value']/1000)
+            endDatePlusOne = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1]+1,'day').getInfo()['value']/1000)
+ 
+            print('Processing feature:',n,' from ', startDate,' to ',endDate)
+            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+            dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+
+            # process one month at a time to prevent GEE memory limits
+            siteCollection = ee.ImageCollection([])
+            for index, Dates in dateRange.iterrows():
+                print(Dates)
+                monthlyCollection = getCollection(site,variableName,collectionOptions[imageCollectionName],networkOptions[variableName][imageCollectionName],maxCloudcover,bufferSize,scaleSize, \
+                            Dates['startDate'],Dates['endDate'],filterSize,subsamplingFraction)
+                if monthlyCollection :
+                    siteCollection = siteCollection.merge(monthlyCollection)
+                
+            result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
+                        algorithm.__name__ : siteCollection })
+        
+        outputDictionary.update({input: result})
+        print('\nDONE LEAF IMAGE\n')
     return outputDictionary
