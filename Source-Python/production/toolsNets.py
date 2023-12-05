@@ -120,11 +120,10 @@ def makeNetVars(asset, numNets, variableNum):
     variableNum = ee.Number(variableNum)  
 
     # get selected network 
-    list_features = asset.flatten()
     filtered_features = ee.FeatureCollection(asset.filter(ee.Filter.eq('tabledata3', variableNum))).toList(numNets)
-    
-    return ee.List.sequence(1,numNets).map(lambda netNum: makeNets(filtered_features,netNum))
+    netVars = ee.List.sequence(1,numNets).map(lambda netNum: makeNets(filtered_features,netNum))
 
+    return netVars
 
 # return dictionary with image masked so the networkID band equals the netIndex and the corresponding network
 def selectNet(image, netList, inputNames, netIndex):
@@ -196,7 +195,7 @@ def wrapperNNets(network, partition, netOptions, colOptions, suffixName, outputN
 
     # determine networks based on collection
     netList = ee.List(network.get(ee.Number(netOptions.get("variable")).subtract(1)))
-    
+
     # parse land cover into network index and add to input image
     imageInput = imageInput.addBands(makeIndexLayer(partition,colOptions["legend"],colOptions["Network_Ind"]))
 

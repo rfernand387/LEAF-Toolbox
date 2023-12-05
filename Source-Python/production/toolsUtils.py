@@ -18,10 +18,11 @@ def deltaTime(midDate, image):
 
 
 # return image with selected bands scaled
-def scaleBands(bandList, scaleList, image):
+def scaleBands(bandList, scaleList, offsetList,image):
     bandList = ee.List(bandList)
     scaleList = ee.List(scaleList)
-    return image.addBands(image.select(bandList).multiply(ee.Image.constant(scaleList)).rename(bandList), overwrite = True)
+    offsetList = ee.List(offsetList)
+    return image.addBands(image.select(bandList).multiply(ee.Image.constant(scaleList)).add(ee.Image.constant(offsetList)).rename(bandList), overwrite = True)
 
 
 # determine if inputs fall in domain of algorithm

@@ -31,8 +31,8 @@ def addGeometry(colOptions,image):
   
   geometryBands = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA").filterMetadata('system:index','equals',image.get('system:index')) .first() 
 
-  return image.addBands(geometryBands.select([colOptions['vza'],colOptions['sza']]).divide(1000).multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename('cosVZA','cosSZA')) \
-              .addBands(geometryBands.select(colOptions['vaa']).subtract(geometryBands.select(colOptions['saa'])).divide(1000).multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename('cosRAA')) 
+  return image.addBands(geometryBands.select([colOptions['vza'],colOptions['sza']]).divide(100).multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename('cosVZA','cosSZA')) \
+              .addBands(geometryBands.select(colOptions['vaa']).subtract(geometryBands.select(colOptions['saa'])).divide(100).multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename('cosRAA')) 
 
 
 # Simple spec score

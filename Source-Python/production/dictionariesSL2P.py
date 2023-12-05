@@ -124,32 +124,32 @@ def make_net_options():
             "COPERNICUS/S2_SR_HARMONIZED": {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp": ['B4', 'B5', 'B6', 'B7', 'B8A', 'B9', 'B11', 'B12']
+                "inputBands": ['B4', 'B5', 'B6', 'B7', 'B8A', 'B9', 'B11', 'B12']
             },
             "COPERNICUS/S2_SR_HARMONIZED_10m": {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp": ['B2', 'B3', 'B4', 'B8']
+                "inputBands": ['B2', 'B3', 'B4', 'B8']
             },
             'LANDSAT/LC08/C02/T1_L2': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputBands":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
                 },
             'LANDSAT/LC09/C02/T1_L2': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputBands":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
                 },
             'NASA/HLS/HLSL30/v002': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp":      [ 'B1','B2','B3', 'B4', 'B5', 'B6', 'B7'],
+                "inputBands":      [ 'B1','B2','B3', 'B4', 'B5', 'B6', 'B7'],
                 },
             'users/rfernand387/L2avalidation': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inp":      [ 'B1','B2','B3','B4', 'B5', 'B6', 'B7', 'B8','B8A','B9','B10','B11','B12'],
+                "inputBands":      [ 'B1','B2','B3','B4', 'B5', 'B6', 'B7', 'B8','B8A','B9','B10','B11','B12'],
                 }
         },
         'Albedo': {
@@ -208,7 +208,7 @@ def make_net_options():
                 "description": 'Black sky albedo',
                 "variable": 6,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(0)),
                 "outmax": (ee.Image(1))
@@ -270,8 +270,8 @@ def make_net_options():
                 "description": 'Fraction of absorbed photosynthetically active radiation',
                 "variable": 2,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
-                "inputOffset":     [1,0,0,0,0,0,0,0],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
+                "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(0)),
                 "outmax": (ee.Image(1))
                 }
@@ -332,7 +332,7 @@ def make_net_options():
                 "description": 'Fraction of canopy cover',
                 "variable": 3,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(0)),
                 "outmax": (ee.Image(1))
@@ -349,7 +349,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[10]]))) 
             },
             "COPERNICUS/S2_SR_HARMONIZED_10m": {
                 "Name": 'LAI',
@@ -361,7 +361,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]])))
+                "outmax": (ee.Image(ee.Array([[10]])))
             },
             'LANDSAT/LC08/C02/T1_L2': {
                 "Name": 'LAI',
@@ -373,7 +373,7 @@ def make_net_options():
                 "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
                 "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[10]]))) 
             },
             'LANDSAT/LC09/C02/T1_L2': {
                  "Name": 'LAI',
@@ -385,7 +385,7 @@ def make_net_options():
                 "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
                 "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[10]]))) 
             },
             'NASA/HLS/HLSL30/v002': {
                 "Name": 'LAI',
@@ -394,10 +394,10 @@ def make_net_options():
                 "description": 'Leaf area index',
                 "variable": 1,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
-                "outmin": (ee.Image(0)),
-                "outmax": (ee.Image(1))
+                "outmin": (ee.Image(ee.Array([[0]]))),
+                "outmax": (ee.Image(ee.Array([[10]]))) 
                 }
         },
         'CCC': {
@@ -411,7 +411,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[100]]))) 
             },
             "COPERNICUS/S2_SR_HARMONIZED_10m": {
                 "Name": 'CCC',
@@ -423,7 +423,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]])))
+                "outmax": (ee.Image(ee.Array([[100]]))) 
             },
             'LANDSAT/LC08/C02/T1_L2': {
                 "Name": 'CCC',
@@ -435,7 +435,7 @@ def make_net_options():
                 "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
                 "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[100]]))) 
             },
             'LANDSAT/LC09/C02/T1_L2': {
                 "Name": 'CCC',
@@ -447,7 +447,7 @@ def make_net_options():
                 "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
                 "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[100]]))) 
             },
             'NASA/HLS/HLSL30/v002': {
                 "Name": 'CCC',
@@ -456,10 +456,10 @@ def make_net_options():
                 "description": 'Canopy chlorophyll content',
                 "variable": 4,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
-                "outmin": (ee.Image(0)),
-                "outmax": (ee.Image(1))
+                "outmin": (ee.Image(ee.Array([[0]]))),
+                "outmax": (ee.Image(ee.Array([[100]]))) 
                 }
         },
         'CWC': {
@@ -473,7 +473,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[100]])))
             },
             "COPERNICUS/S2_SR_HARMONIZED_10m": {
                 "Name": 'CWC',
@@ -485,7 +485,7 @@ def make_net_options():
                 "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]])))
+                "outmax": (ee.Image(ee.Array([[100]])))
             },
             'LANDSAT/LC08/C02/T1_L2': {
                 "Name": 'CWC',
@@ -509,7 +509,7 @@ def make_net_options():
                 "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
                 "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
                 "outmin": (ee.Image(ee.Array([[0]]))),
-                "outmax": (ee.Image(ee.Array([[1]]))) 
+                "outmax": (ee.Image(ee.Array([[100]])))
             }, 
             'NASA/HLS/HLSL30/v002': {
                 "Name": 'CWC',
@@ -518,10 +518,10 @@ def make_net_options():
                 "description": 'Canopy water content',
                 "variable": 5,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','B3', 'B4', 'B5', 'B6', 'B7'],
-                "inputScaling":     [0,.0001,.0001,1,1,1,1,1],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
                 "inputOffset":     [0,0,0,0,0,0,0,0],
-                "outmin": (ee.Image(0)),
-                "outmax": (ee.Image(1))
+                "outmin": (ee.Image(ee.Array([[0]]))),
+                "outmax": (ee.Image(ee.Array([[100]])))
                 }
         },
         'DASF': {
@@ -568,8 +568,8 @@ def make_net_options():
                 "description": 'Directional area scattering factor',
                 "variable": 7,
                 "inputBands":      ['cosVZA','cosSZA','cosRAA','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
-                "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
-                "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1],
+                "inputOffset":     [0,0,0,0,0,0,0,0],
                 "outmin": (ee.Image(ee.Array([[0]]))),
                 "outmax": (ee.Image(ee.Array([[1]]))) 
                 }, 

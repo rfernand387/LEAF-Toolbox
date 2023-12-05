@@ -1,12 +1,12 @@
 import pandas as pd
 import ee
 import toolsUtils
-import toolsSampling
 import eoImage
 import toolsNets
 import eoImage
 import toolsUtils
 import dictionariesSL2P 
+from datetime import datetime
 
 #makes products for specified region and time period 
 def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,endDate,maxCloudcover,outputScale,filterSize) :
@@ -17,8 +17,10 @@ def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,end
     
     # parse the networks
     # check how many different unique networks are available (i.e. by partition class) - this is used for SL2P-CCRS
-    numNets = ee.Number(ee.Feature((colOptions["Network_Ind"]).first()).propertyNames().remove('Feature Index').remove('system:index').size())
+    numNets = ee.Number(ee.Feature((colOptions["Network_Ind"]).first()).propertyNames().remove('lon').remove('Feature Index').remove('system:index').size())
+
     # populate the netwoorks for each unique partition class
+    net1 = toolsNets.makeNetVars(colOptions["Collection_SL2P"],numNets,1)
     SL2P = ee.List.sequence(1,ee.Number(colOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(colOptions["Collection_SL2P"],numNets,netNum))
     errorsSL2P = ee.List.sequence(1,ee.Number(colOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(colOptions["Collection_SL2Perrors"],numNets,netNum))
 
@@ -56,19 +58,21 @@ def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,end
         else:
             # get partition used to select network
             partition = (colOptions["partition"]).filterBounds(mapBounds).mosaic().clip(mapBounds).rename('partition');
+
             # pre process input imagery and flag invalid inputs
-            input_collection  =  input_collection.map(lambda image: tools.MaskLand(image)).map(lambda image: toolsUtils.scaleBands(netOptions["inputBands"],netOptions["inputScaling"],image)) \
+            input_collection  =  input_collection.map(lambda image: tools.MaskLand(image)).map(lambda image: \
+                                        toolsUtils.scaleBands(netOptions["inputBands"],netOptions["inputScaling"],netOptions["inputOffset"],image)) \
                                                  .map(lambda image: toolsUtils.invalidInput(colOptions["sl2pDomain"],netOptions["inputBands"],image)) 
 
 
             ## apply networks to produce mapped parameters                                                
             products =  input_collection.select(['date','QC','longitude','latitude'])            
+            image = input_collection.first()
             estimateSL2P = input_collection.map(lambda image: toolsNets.wrapperNNets(SL2P,partition, netOptions, colOptions,"estimate",variable,image))
             uncertaintySL2P = input_collection.map(lambda image: toolsNets.wrapperNNets(errorsSL2P,partition, netOptions, colOptions,"error",variable,image))
 
             # Define a boxcar or low-pass kernel.
             if (filterSize > 0 ):
-                print('smoothing')
                 boxcar = ee.Kernel.square(radius= filterSize, units= 'meters', normalize= True);
 
                 # mask by QC and boxcar filter the estimate andu ncertainty layers
@@ -76,72 +80,68 @@ def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,end
                 uncertaintySL2P = uncertaintySL2P.map( lambda image: image.addBands(image.updateMask(image.select('QC').eq(0)).select("uncertanity"+variable).convolve(boxcar)))
 
             products =  products.combine(estimateSL2P).combine(uncertaintySL2P.select("error"+variable))
+            
             # image = estimatesSL2P.first()
             # samples=image.sample(region=miage.geometry(), projection=image.select('date').projection(), scale=outputScale,geometries=True, dropNulls = False)
             # sampleList2= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': samples.aggregate_array(bandName)})))
-            # print(sampleList2.getInfo())
+            # print(sampleList2.getInfo())]
+
+    else:
+        print('No images found.')
+
     
     return products
 
 # returns lists of sampled values for each band in an image as a new feature property
-def sampleProductCollection(productCollection, outputScale, sampleRegion) :
+def sampleProductCollection(productCollection, outputScale, sampleRegion,factor=1) :
 
-    # print('sampleProductCollection')
     productCollection = ee.ImageCollection(productCollection)
     outputScale= ee.Number(outputScale)
     sampleRegion = ee.Feature(sampleRegion)
 
     # produce feature collection where each feature a feature collectiion corresponding to a list of samples from a given band from one product image
-    # first add a band of ones to the image to account for masked data
-    sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select('date').projection(), scale=outputScale,geometries=True, dropNulls = False) ).flatten()
-    # print(productCollection.first().bandNames().getInfo())
-    # image = productCollection.first()
-    # samples=image.sample(region=sampleRegion.geometry(), projection=image.select('date').projection(), scale=outputScale,geometries=True, dropNulls = False)
-    # sampleList2= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': samples.aggregate_array(bandName)})))
-    # print(sampleList2.getInfo())
+    sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select('date').projection(), scale=outputScale,geometries=True, dropNulls = True, factor=factor) ).flatten()
+ 
     # for each band get a dictionary of sampled values as a property of the sampleRegion feature
     sampleList= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': sampleData.aggregate_array(bandName)})))
-
     
     return sampleRegion.set('samples',sampleList)
 
 # add dictionary of sampled values from product to a feature
-def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSize,outputScale,deltaTime,filterSize):
+def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSize,outputScale,startDate,endDate,filterSize,factor=1):
     
-    # define vars
+    # Buffer features is requested
     if ( bufferSize > 0 ):
-        site = ee.Feature(site).buffer(bufferSize*2)
+        site = ee.Feature(site).buffer(bufferSize)
     else:
         site = ee.Feature(site)        
     
-    # get start and end date for this feature
-    startDate = ee.Date(site.get('system:time_start')).advance(deltaTime[0],'day')
-    endDate = ee.Date(site.get('system:time_end')).advance(deltaTime[1],'day')
- 
-    # make collection
-    sampleFeature = [];
+     # make collection
+    sampleFeature = []
     productCollection = []
-    productCollection = ee.ImageCollection(makeProductCollection(collectionOptions,networkOptions,variable,site.geometry(),startDate,endDate,maxCloudcover,outputScale,filterSize))
+    productCollection = makeProductCollection(collectionOptions,networkOptions,variable,site.geometry(),startDate,endDate,maxCloudcover,outputScale,filterSize)
     if productCollection :
         if ( ee.ImageCollection(productCollection).size().gt(0) ) :
-            sampleFeature = sampleProductCollection(productCollection, outputScale, site.geometry())
+            sampleFeature = sampleProductCollection(productCollection, outputScale, site.geometry(),factor)
 
     return  sampleFeature
 
 #format samples into a data frame
 def samplestoDF(sampleFeature):
+
+    # create empty data frame to hold samples
     sampleDF = pd.DataFrame()
+    
+    # loop over list of samples and add row to dataframe
     sampleList = ee.Dictionary(ee.Feature(sampleFeature).toDictionary()).getInfo()['samples'] 
-    # print(len(sampleList[0]))
     for col in sampleList:
         df = pd.DataFrame((col['data']),columns=[col['bandName']])
         if (not(df.empty)) :
-            sampleDF = pd.concat([sampleDF,df],axis=1)
-    # print(sampleDF)
-    return sampleDF.dropna(subset=['date'])
+            sampleDF = pd.concat([sampleDF,df],axis=1).dropna(subset=['date'])
+    return sampleDF
 
 #sample features for LEAF output
-def sampleSites(siteList,imageCollectionName,algorithm,variableName,maxCloudcover,filterSize,scaleSize,bufferSize,deltaTime,):
+def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=0,filterSize=0,scaleSize=30,bufferSize=0,deltaTime=[0,0],subsamplingFraction=1):
     
     print('\nSTARTING LEAF SITE\n ')
 
@@ -156,12 +156,32 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName,maxCloudcove
         print('Site: ',input, ' with ',sampleRecords.size().getInfo(), ' features.')
         result = []
         for n in range(0,sampleRecords.size().getInfo()) : 
-            print('Processing feature:',n)
-            sampleFeature= getSamples(sampleRecords.get(n),variableName,collectionOptions[imageCollectionName],networkOptions[variableName][imageCollectionName],maxCloudcover,bufferSize,scaleSize,deltaTime,filterSize)
-            if sampleFeature :
-                result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
-                               algorithm.__name__ : samplestoDF(sampleFeature) })
+
+            # select feature to process
             
+            site = ee.Feature(sampleRecords.get(n))
+
+            # get start and end date for this feature
+            startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).advance(deltaTime[0],'day').getInfo()['value']/1000)
+            endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1],'day').getInfo()['value']/1000)
+            endDatePlusOne = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1]+1,'day').getInfo()['value']/1000)
+ 
+            print('Processing feature:',n,' from ', startDate,' to ',endDate)
+            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+            dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+
+            # process one month at a time to prevent GEE memory limits
+            samplesDF = pd.DataFrame()
+            for index, Dates in dateRange.iterrows():
+                print(Dates)
+                sampleFeature= getSamples(site,variableName,collectionOptions[imageCollectionName],networkOptions[variableName][imageCollectionName],maxCloudcover,bufferSize,scaleSize, \
+                            Dates['startDate'],Dates['endDate'],filterSize,subsamplingFraction)
+                if sampleFeature :
+                    samplesDF = pd.concat([samplesDF,samplestoDF(sampleFeature)],ignore_index=True)
+                
+            result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
+                        algorithm.__name__ : samplesDF })
+        
         outputDictionary.update({input: result})
         print('\nDONE LEAF SITE\n')
     return outputDictionary

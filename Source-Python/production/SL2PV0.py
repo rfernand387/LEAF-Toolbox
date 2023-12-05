@@ -105,7 +105,6 @@ def s2_10m_createFeatureCollection_legend():
  # -------------------
  # Landsat8 Functions:
  # -------------------
-
 def l8_createFeatureCollection_estimates():
     return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1')
 
@@ -144,13 +143,13 @@ def l8_createFeatureCollection_legend():
  # -------------------
 
 def l9_createFeatureCollection_estimates():
-    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1')
+    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1')
 
 def l9_createFeatureCollection_errors():
-    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')
+    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')
 
 def l9_createFeatureCollection_domains():
-    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_domain')
+    return ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_domain')
 
 def l9_createFeatureCollection_ranges():
     return ee.FeatureCollection('users/rfernand387/LANDSAT_LC08_C01_T1_SR/LANDSAT_LC08_C01_T1_SR_RANGE')
