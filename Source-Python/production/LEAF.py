@@ -144,12 +144,16 @@ def samplestoDF(sampleFeature):
     # create empty data frame to hold samples
     sampleDF = pd.DataFrame()
     
-    # loop over list of samples and add row to dataframe
-    sampleList = ee.Dictionary(ee.Feature(sampleFeature).toDictionary()).getInfo()['samples'] 
+    # loop over list of samples and add column for each property sampled to dataframe
+    sampleList = ee.Dictionary(ee.Feature(sampleFeature).toDictionary()).getInfo()['samples']
     for col in sampleList:
         df = pd.DataFrame((col['data']),columns=[col['bandName']])
         if (not(df.empty)) :
-            sampleDF = pd.concat([sampleDF,df],axis=1).dropna(subset=['date'])
+            sampleDF = pd.concat([sampleDF,df],axis=1) 
+    
+    if  (not(sampleDF.empty)) :
+        sampleDF = sampleDF.dropna(subset=['date'])
+
     return sampleDF
 
 #sample features for LEAF output
