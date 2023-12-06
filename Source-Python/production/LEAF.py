@@ -183,8 +183,13 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             endDatePlusOne = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1]+1,'day').getInfo()['value']/1000)
  
             print('Processing feature:',n,' from ', startDate,' to ',endDate)
-            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
-            dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+
+            #do monthly processing 
+            if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
+                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+                dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+            else:
+                dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
 
             # process one month at a time to prevent GEE memory limits
             samplesDF = pd.DataFrame()
@@ -230,8 +235,12 @@ def imageSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClou
             endDatePlusOne = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(deltaTime[1]+1,'day').getInfo()['value']/1000)
  
             print('Processing feature:',n,' from ', startDate,' to ',endDate)
-            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
-            dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+             #do monthly processing 
+            if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
+                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+                dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
+            else:
+                dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
 
             # process one month at a time to prevent GEE memory limits
             siteCollection = ee.ImageCollection([])
