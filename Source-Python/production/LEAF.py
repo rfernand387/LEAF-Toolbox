@@ -8,6 +8,8 @@ import toolsUtils
 import dictionariesSL2P 
 from datetime import timedelta
 from datetime import datetime
+import pickle
+
 
 #makes products for specified region and time period 
 def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,endDate,maxCloudcover,inputScaleSize) :
@@ -166,19 +168,22 @@ def samplestoDF(sampleFeature):
     return sampleDF
 
 #sample features for LEAF output
-def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1):
+def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,outputFileName=None):
     
     print('\nSTARTING LEAF IMAGE for ',imageCollectionName,'\n ')
 
     #parse bufferTemporalSize 
     #if it is in date time format assign it to startDate and endDate 
     
-    try: 
-        startDate = datetime.strptime(bufferTemporalSize[0],"%Y-%m-%d")
-        endDate =  datetime.strptime(bufferTemporalSize[1],"%Y-%m-%d")
-        endDatePlusOne = endDate + timedelta(days=1)
-        defaultDate=True
-    except ValueError:
+    if (type(bufferTemporalSize[0])==str):
+        try: 
+            startDate = datetime.strptime(bufferTemporalSize[0],"%Y-%m-%d")
+            endDate =  datetime.strptime(bufferTemporalSize[1],"%Y-%m-%d")
+            endDatePlusOne = endDate + timedelta(days=1)
+            defaultDate=True
+        except ValueError:
+            defaultDate = False
+    else:
         defaultDate = False
 
     outputDictionary = {}
@@ -224,8 +229,17 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
                         algorithm.__name__ : samplesDF })
         
+            #dump every 100
+            if (outputFileName & ( n % 100 ) == 0 ):
+                with open("f:/modisLandsat/dataLandsat08SR", "wb") as fp:   #Pickling
+                    pickle.dump(outputDictionary, fp)
+
         outputDictionary.update({input: result})
         print('\nDONE LEAF SITE\n')
+
+        if ( outputFileName ):
+            with open(outputFileName, "wb") as fp:   #Pickling
+                pickle.dump(outputDictionary, fp)
     return outputDictionary
 
 
