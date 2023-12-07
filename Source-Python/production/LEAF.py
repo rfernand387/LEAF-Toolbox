@@ -203,13 +203,16 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             site = ee.Feature(sampleRecords.get(n))
 
             # get start and end date for this feature if it 
+            print(bufferTemporalSize)
             if ( defaultDate==False ):
-                startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).advance(bufferTemporalSize[0],'day').getInfo()['value']/1000)
-                endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(bufferTemporalSize[1],'day').getInfo()['value']/1000)
-                endDatePlusOne = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(bufferTemporalSize[1]+1,'day').getInfo()['value']/1000)
+                startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[0])
+                if ("system:time_end" in site.propertyNames().getInfo()):
+                    endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[1])
+                else:
+                    endDate = startDate + timedelta(days=bufferTemporalSize[1])
+                endDatePlusOne = endDate + timedelta(days=1)
                 
             print('Processing feature:',n,' from ', startDate,' to ',endDate)
-
             #do monthly processing 
             if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
                 dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
@@ -230,9 +233,10 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
                         algorithm.__name__ : samplesDF })
         
             #dump every 100
-            if (outputFileName & ( n % 100 ) == 0 ):
-                with open("f:/modisLandsat/dataLandsat08SR", "wb") as fp:   #Pickling
-                    pickle.dump(outputDictionary, fp)
+            if (outputFileName):
+                if (( n % 100 ) == 0 ):
+                    with open("f:/modisLandsat/dataLandsat08SR", "wb") as fp:   #Pickling
+                        pickle.dump(outputDictionary, fp)
 
         outputDictionary.update({input: result})
         print('\nDONE LEAF SITE\n')
