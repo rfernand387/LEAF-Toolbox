@@ -1,1 +1,4 @@
-Validation of Simplified Level 2 Prototype Processor Sentinel-2 fraction of canopy cover, fraction of absorbed photosynthetically active radiation and leaf area index products over North American forests
+DEPRECATED - DO NOT USE - RICHARD FERNANDES NOV 2023
+
+
+Leaf toolbox source used for validation.  Will eventually be moved to source-python modules when stable.
