@@ -124,7 +124,7 @@ def export_jpeg(fig_name, outputName):
     return
 
 
-default_asset_location = "projects/ee-modis250/assets"
+default_asset_location = "users/kateharvey"
 def export_collection_to_gee(collection, num_images: int=0, image_names: list=[], asset_folder: str=default_asset_location, scale: float=20, max_pixels: int=1e8, data_type: str="float"):
     collection = ee.ImageCollection(collection)
     image_list = collection.toList(num_images)
