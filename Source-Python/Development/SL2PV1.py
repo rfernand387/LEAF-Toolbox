@@ -36,7 +36,8 @@ class algorithm:
                         .map(lambda image: eoImage.attach_Date(image)) \
                         .map(lambda image: eoImage.attach_LonLat(image)) \
                         .map(lambda image: self.tools.addGeometry(self.collectionOptions,image)) 
-                        
+
+
     # determine if inputs fall in domain of algorithm
     # need to be updated to allow for the domain to vary with partition
     def invalidInput(Domain,bandList,image):
@@ -48,8 +49,9 @@ class algorithm:
         image = image.addBands(image.select(bandList).multiply(ee.Image.constant(ee.Number(10))).ceil().mod(ee.Number(10)).uint8()\
                         .multiply(ee.Image.constant(ee.List.sequence(0,bandList.length().subtract(1)).map(lambda value:
                                 ee.Number(10).pow(ee.Number(value)))))\
-                        .reduce("sum").remap(Domain, ee.List.repeat(0, sl2pDomain.length()),1).rename("QC"))
+                        .reduce("sum").remap(Domain, ee.List.repeat(0, Domain.length()),1).rename("QC"))
         return image
+
 
     def fit(self):
 
@@ -59,8 +61,8 @@ class algorithm:
         numNets = ee.Number(ee.Feature((self.collectionOptions["Network_Ind"]).first()).propertyNames().remove('lon').remove('Feature Index').remove('system:index').size())
         
         # populate the netwoorks for each unique partition class
-        net1 = toolsNets.makeNetVars(self.collectionOptions["Collection_SL2P"],numNets,1)
-        return ee.List.sequence(1,ee.Number(self.collectionOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(self.collectionOptions["Collection_SL2P"],numNets,netNum))
+        net1 = toolsNets.makeNetVars(self.collectionOptions["Collection_estimates"],numNets,1)
+        return ee.List.sequence(1,ee.Number(self.collectionOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(self.collectionOptions["Collection_estimates"],numNets,netNum))
     
 
     def fitUncertainty(self):
@@ -71,25 +73,24 @@ class algorithm:
         numNets = ee.Number(ee.Feature((self.collectionOptions["Network_Ind"]).first()).propertyNames().remove('lon').remove('Feature Index').remove('system:index').size())
         
         # populate the netwoorks for each unique partition class
-        net1 = toolsNets.makeNetVars(self.collectionOptions["Collection_SL2Perrors"],numNets,1)
-        return ee.List.sequence(1,ee.Number(self.collectionOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(self.collectionOptions["Collection_SL2Perrors"],numNets,netNum))
+        net1 = toolsNets.makeNetVars(self.collectionOptions["Collection_errors"],numNets,1)
+        return ee.List.sequence(1,ee.Number(self.collectionOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(self.collectionOptions["Collection_errors"],numNets,netNum))
 
     # pre process input imagery and flag invalid inputs
     def preprocessInput(self,input_collection):
         return input_collection.map(lambda image: self.tools.MaskLand(image)).map(lambda image: \
                         toolsUtils.scaleBands(self.networkOptions["inputBands"],self.networkOptions["inputScaling"],self.networkOptions["inputOffset"],image)) \
-                                .map(lambda image: toolsUtils.invalidInput(self.collectionOptions["sl2pDomain"],self.networkOptions["inputBands"],image)) 
+                                .map(lambda image: self.invalidInput(self.collectionOptions["Domain"],self.networkOptions["inputBands"],image)) 
 
-    def predict(self,name,variable,image):
+    def predict(self,image):
         image = ee.Image(image)
 
-        return toolsNets.wrapperNNets(self.estimator,self.__clipPartition(image),self.networkOptions,self.collectionOptions,name,variable,image)
+        return toolsNets.wrapperNNets(self.estimator,self.__clipPartition(image),self.networkOptions,self.collectionOptions,"estimate",self.networkOptions['Name'],image)
 
     def predictUncertainty(self,name,variable,image):
         image = ee.Image(image)
 
-        return toolsNets.wrapperNNets(self.uncertainty,self.__clipPartition(image),self.networkOptions,self.collectionOptions,name,variable,image)
-
+        return toolsNets.wrapperNNets(self.uncertainty,self.__clipPartition(image),self.networkOptions,self.collectionOptions,"errors",self.networkOptions['Name'],image)
 
     class featureCollectionConstructors():
 

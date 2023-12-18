@@ -1,14 +1,9 @@
 import pandas as pd
 import ee
 import toolsUtils
-import eoImage
-import toolsNets
-import eoImage
 import toolsUtils
 import dictionariesSL2P 
-# from datetime import timedelta
-# from datetime import datetime
-import pickle
+from datetime import datetime
 
 
 #makes products for specified region and time period 
@@ -81,7 +76,7 @@ def getSamples(site,variable,algorithm,collectionOptions,maxCloudcover,bufferSpa
     return  sampleFeature
 
 # add dictionary of sampled values from product to a feature
-def getCollection(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSize,outputScaleSize, inputScaleSize,startDate,endDate,factor=1):
+def getCollection(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSpatialSize,outputScaleSize, inputScaleSize,startDate,endDate,factor=1):
     
     # Buffer features is requested
     if ( bufferSpatialSize > 0 ):
@@ -92,8 +87,8 @@ def getCollection(site,variable,collectionOptions,networkOptions,maxCloudcover,b
     # Make the output collection and rescale it if requested    
     outputCollection = makeProductCollection(collectionOptions,networkOptions,variable,site.geometry(),startDate,endDate,maxCloudcover,inputScaleSize) 
     if ( outputScaleSize != inputScaleSize ):
-        outputCollection = outputCollection.reduceResolution({reducer: ee.Reducer.mean(),maxPixels: 1024}) \
-                                            .reproject({crs: outputCollection,scale:outputScaleSize});
+        outputCollection = outputCollection.reduceResolution({"reducer": ee.Reducer.mean(),"maxPixels": 1024}) \
+                                            .reproject({"crs": outputCollection,"scale":outputScaleSize})
     return outputCollection
 
 

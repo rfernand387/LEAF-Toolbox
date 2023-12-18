@@ -24,9 +24,8 @@ def addGeometry(image):
   
   szaBand = ee.ImageCollection("MODIS/061/MCD43A2").filter(ee.Filter.eq("system:id",image.get("system:id"))).select("BRDF_Albedo_LocalSolarNoon")
 
-
   return image.addBands(ee.Image.constant(1).rename['cosVZA']) \
-              .addBands(szaBand.multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename['cosSZA']) \     
-              .addBands(ee.Image.constant(1).rename['cosRAA']) \
+              .addBands(szaBand.multiply(3.1415).divide(180).cos().multiply(10000).toUint16().rename['cosSZA']) \
+              .addBands(ee.Image.constant(1).rename['cosRAA']) 
 
 

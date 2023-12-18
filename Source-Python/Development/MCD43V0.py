@@ -16,13 +16,26 @@ class algorithm:
     def __init__(self, variableName,collectionName):
         self.cc = self.collectionConstructors()
         self.networkOptions= dictionariesMCD43.make_net_options()[variableName][collectionName]
-        self.collectionOptions= dictionariesMCD43.make_collection_options(cc)[collectionName]
+        self.collectionOptions= dictionariesMCD43.make_collection_options(self.cc)[collectionName]
         self.tools = self.collectionOptions["tools"]
-
-    def __clipPartition(self,image):
-        image = ee.Image(image)
-        return (self.partition).filterBounds(image.geometry()).mosaic().clip(image.geometry()).rename('partition')
  
+    #applies a network corresponding to an image 
+    #the network corresponds to a polynomial where each coefficient is specified by a network band and each 
+    #term is a non-linear function of the inputs specified by the network bandName (yes this means the band name is a long math function!)
+    #the polynominal is further transformed by a network property "outputFunction" to allow for a nonlinear output
+    #and weighted by a network "weight" property as there can be multiple network estimators that are later weighted
+    #
+    #the operations are scale dependent so make sure to reproject both image and network to the scale required in the networkOptions
+    #before you call this function
+    def __applyNetwork(self,image,network):
+        image = ee.Image(image)
+        network= ee.Image(network)
+        return ee.ImageCollection(network.bandNames() \
+                                  .map( lambda bandName: ee.Image(network.select(bandName).multiply(image.expression(ee.String(bandName))))).sum()\
+                                  .map( lambda estimate: estimate.expression(network.get("outputFunction")) \
+                                  .map( lambda estimate: network.get("weight").multiply(estimate))))
+
+
     def createInput(self,mapBounds,startDate,endDate,maxCloudcover):
         return  ee.ImageCollection(self.collectionOptions['name']) \
                         .filterBounds(mapBounds) \
@@ -46,29 +59,39 @@ class algorithm:
                         toolsUtils.scaleBands(self.networkOptions["inputBands"],self.networkOptions["inputScaling"],self.networkOptions["inputOffset"],image)) \
                                 .map(lambda image: toolsUtils.invalidInput(self.collectionOptions["MCD43Domain"],self.networkOptions["inputBands"],image)) 
 
-    #apply first eestimates network to first input feature for the selected variable
-    #the network is simply the linear regression coefficients
-    def predict(self,name,variable,image):
-        image = ee.Image(image)
-        collectionEstimates = ee.ImageCollection(self.collectionOptions['Collection_estimates'])
+    #apply errors networks for the selected variable at the scale they were calibrated 
+    #the network is simply the linear regression coefficients in separate bands
+    def predict(self,name,image):
+        
+        image = ee.Image(image).reproject({"crs": image.projection(),"scale":self.networkOptions["scale"]})
+
+        networks = ee.ImageCollection(self.collectionOptions['Collection_estimates']) \
+                                .collectionEstimates.filter(ee.Filter.eq('variable',variableNumber)) \
+                                .clip(image.geometry()) \
+                                .map(lambda image: image.reproject({"crs": image.projection(),"scale":self.networkOptions["scale"]}))
+                                
+        
         variableNumber = self.networkOptions['variable']
         
-        # dot product of network coefficients and input feature
-        image = collectionEstimates.filter(ee.Filter.eq('variable',variableNumber)).first().multiply(image.first().first()).sum()
-        return image.rename(name)
+        # apply each network to produce an estimate and return a weigted sum
+        return networks.map(lambda network: self.applyNetwork(image,network)).sum().divide(networks.aggregate_sum("weights"))
+                                        
 
-    #apply first errors network to first input feature for the selected variable
+    #apply errors networks for the selected variable at the scale they were calibrated 
     #the network is simply the linear regression coefficients
     def predictUncertainty(self,name,variable,image):
-        image = ee.Image(image)
-        network = ee.ImageCollection(self.collectionOptions['Collection_errors'])
+        image = ee.Image(image).reproject({"crs": image.projection(),"scale":self.networkOptions["scale"]})
+        networks = ee.ImageCollection(self.collectionOptions['Collection_errorss']) \
+                                .collectionEstimates.filter(ee.Filter.eq('variable',variableNumber)) \
+                                .clip(image.geometry()) \
+                                .map(lambda image: image.reproject({"crs": image.projection(),"scale":self.networkOptions["scale"]}))
+        
         variableNumber = self.networkOptions['variable']
         
-        # dot product of network coefficients and input feature
-        image = network.filter(ee.Filter.eq('variable',variableNumber)).first().multiply(image).sum()
-        return image.rename(name)
+        # apply each network to produce an estimate and return a weigted sum
+        return networks.map(lambda network: self.applyNetwork(image,network)).sum().divide(networks.aggregate_sum("weights"))
 
-     class collectionConstructors():
+    class collectionConstructors():
 
         def __init__(self):
             self.Name = 'MCD43'       

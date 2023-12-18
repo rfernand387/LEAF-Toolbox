@@ -11,7 +11,7 @@ def invalidInput(sl2pDomain,bandList,image):
   # intialize inputs
   image = ee.Image(image)
   sl2pDomain = ee.FeatureCollection(sl2pDomain).aggregate_array("DomainCode").sort()
-  bandList = ee.List(bandList).slice(3,null)
+  bandList = ee.List(bandList).slice(3)
 
   # code image bands into a single band and compare to valid codes to make QC band
   imageQC =  image.select(bandList,bandList) \
