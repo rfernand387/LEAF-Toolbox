@@ -203,11 +203,19 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             site = ee.Feature(sampleRecords.get(n))
 
             # get start and end date for this feature if it 
-            print(bufferTemporalSize)
             if ( defaultDate==False ):
-                startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[0])
+                time_start = site.get('system:time_start').getInfo()
+                if isinstance(time_start, int):
+                    startDate = datetime.fromtimestamp(site.get('system:time_start').getInfo()/1000) + timedelta(days=bufferTemporalSize[0])
+                else:
+                    startDate = datetime.fromtimestamp(ee.Date.parse("DD/MM/yy",site.get('system:time_start')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[0])
+
                 if ("system:time_end" in site.propertyNames().getInfo()):
-                    endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[1])
+                    time_end = site.get('system:time_end').getInfo()
+                    if isinstance(time_end, int):
+                        endDate = datetime.fromtimestamp(site.get('system:time_end').getInfo()/1000) + timedelta(days=bufferTemporalSize[0])
+                    else:
+                        endDate = datetime.fromtimestamp(ee.Date.parse("DD/MM/yy",site.get('system:time_end')).getInfo()['value']/1000) + timedelta(days=bufferTemporalSize[0])
                 else:
                     endDate = startDate + timedelta(days=bufferTemporalSize[1])
                 endDatePlusOne = endDate + timedelta(days=1)
@@ -223,7 +231,6 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             # process one month at a time to prevent GEE memory limits
             samplesDF = pd.DataFrame()
             for index, Dates in dateRange.iterrows():
-                print(Dates)
                 sampleFeature= getSamples(site,variableName,collectionOptions[imageCollectionName],networkOptions[variableName][imageCollectionName],maxCloudcover,bufferSpatialSize,inputScaleSize, \
                             Dates['startDate'],Dates['endDate'],outputScaleSize,subsamplingFraction)
                 if sampleFeature :
