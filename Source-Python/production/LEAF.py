@@ -11,6 +11,91 @@ from datetime import datetime
 import pickle
 
 
+
+#makes products for all images in a provided image collection 
+#change input scale if you want to aggregate input bands first
+def makeProductImageCollection(imageCollection,algorithm,variable,inputScaleSize) :
+
+    # specify the collection options based on the image collection
+    imageCollectionName = imageCollection.get("system:id").getInfo()
+    collectionOptions = dictionariesSL2P.make_collection_options(algorithm)
+    networkOptions= dictionariesSL2P.make_net_options()
+    colOptions = collectionOptions[imageCollectionName]
+    netOptions = networkOptions[variable][imageCollectionName]
+    mapBounds = imageCollection.geometry()
+
+    # print('makeProductCollection')
+    products = []
+    tools = colOptions['tools']
+    
+    # parse the networks
+    # check how many different unique networks are available (i.e. by partition class) - this is used for SL2P-CCRS
+    numNets = ee.Number(ee.Feature((colOptions["Network_Ind"]).first()).propertyNames().remove('lon').remove('Feature Index').remove('system:index').size())
+
+    # populate the netwoorks for each unique partition class
+    net1 = toolsNets.makeNetVars(colOptions["Collection_SL2P"],numNets,1)
+    SL2P = ee.List.sequence(1,ee.Number(colOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(colOptions["Collection_SL2P"],numNets,netNum))
+    errorsSL2P = ee.List.sequence(1,ee.Number(colOptions["numVariables"]),1).map(lambda netNum: toolsNets.makeNetVars(colOptions["Collection_SL2Perrors"],numNets,netNum))
+
+    # make products 
+    input_collection =  ee.ImageCollection(imageCollection) \
+                       .limit(5000) \
+                      .map(lambda image: image.clip(mapBounds)) \
+                      .map(lambda image: tools.MaskClear(image))  \
+                      .map(lambda image: eoImage.attach_Date(image)) \
+                      .map(lambda image: eoImage.attach_LonLat(image)) \
+                      .map(lambda image: tools.addGeometry(colOptions,image)) 
+
+    # check if there are products
+    if (input_collection.size().getInfo() > 0):
+
+        # reproject to output scale based if it differs from nominal scale of first band
+        projection = input_collection.first().select(netOptions["inputBands"][6]).projection()
+        if ( projection.nominalScale().getInfo() != inputScaleSize):
+            print('reprojecting')
+            input_collection = input_collection.map( lambda image: image.setDefaultProjection(crs=image.select(image.bandNames().slice(0,1)).projection()) \
+                                                                        .reduceResolution(reducer= ee.Reducer.mean(),maxPixels=1024).reproject(crs=projection,scale=inputScaleSize))
+                                                
+        if variable == "Surface_Reflectance":
+            products = input_collection.map(lambda image: tools.MaskLand(image))
+        else:
+            # get partition used to select network
+            partition = (colOptions["partition"]).filterBounds(mapBounds).mosaic().clip(mapBounds).rename('partition');
+
+            # pre process input imagery and flag invalid inputs
+            input_collection  =  input_collection.map(lambda image: tools.MaskLand(image)).map(lambda image: \
+                                        toolsUtils.scaleBands(netOptions["inputBands"],netOptions["inputScaling"],netOptions["inputOffset"],image)) \
+                                                 .map(lambda image: toolsUtils.invalidInput(colOptions["sl2pDomain"],netOptions["inputBands"],image)) 
+
+
+            ## apply networks to produce mapped parameters                                                
+            products =  input_collection.select(['date','QC','longitude','latitude'])            
+            image = input_collection.first()
+            estimateSL2P = input_collection.map(lambda image: toolsNets.wrapperNNets(SL2P,partition, netOptions, colOptions,"estimate",variable,image))
+            uncertaintySL2P = input_collection.map(lambda image: toolsNets.wrapperNNets(errorsSL2P,partition, netOptions, colOptions,"error",variable,image))
+
+            # Deprecated - we rely on output scale to do this work
+            # # Define a boxcar or low-pass kernel.
+            # if (outputFilterSize > 0 ):
+            #     boxcar = ee.Kernel.square(radius= outputFilterSize, units= 'meters', normalize= True);
+
+            #     # mask by QC and boxcar filter the estimate and uncertainty layers
+            #     estimateSL2P = estimateSL2P.map( lambda image: image.addBands(image.updateMask(image.select('QC').eq(0)).select("estimate"+variable).convolve(boxcar)))
+            #     uncertaintySL2P = uncertaintySL2P.map( lambda image: image.addBands(image.updateMask(image.select('QC').eq(0)).select("uncertanity"+variable).convolve(boxcar)))
+
+            products =  products.combine(estimateSL2P).combine(uncertaintySL2P.select("error"+variable))
+            
+            # image = estimatesSL2P.first()
+            # samples=image.sample(region=miage.geometry(), projection=image.select('date').projection(), scale=inputScaleSize,geometries=True, dropNulls = False)
+            # sampleList2= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': samples.aggregate_array(bandName)})))
+            # print(sampleList2.getInfo())]
+
+    else:
+        print('No images found.')
+
+    
+    return products
+
 #makes products for specified region and time period 
 def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,endDate,maxCloudcover,inputScaleSize) :
 
@@ -58,7 +143,7 @@ def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,end
                                                                     .reduceResolution(reducer= ee.Reducer.mean(),maxPixels=1024).reproject(crs=projection,scale=inputScaleSize))
                                                 
         if variable == "Surface_Reflectance":
-            products = input_collection
+            products = input_collection.map(lambda image: tools.MaskLand(image))
         else:
             # get partition used to select network
             partition = (colOptions["partition"]).filterBounds(mapBounds).mosaic().clip(mapBounds).rename('partition');
