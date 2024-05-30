@@ -91,7 +91,7 @@ def sampleProductCollection(productCollection, sampleRegion, outputScaleSize, fa
     sampleRegion = ee.Feature(sampleRegion)
 
     # produce feature collection where each feature a feature collectiion corresponding to a list of samples from a given band from one product image
-    sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select('date').projection(), scale=outputScaleSize,geometries=True, dropNulls = True, factor=factor) ).flatten()
+    sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select(image.slice(4,5).bandNames()).projection(), scale=outputScaleSize,geometries=True, dropNulls = True, factor=factor) ).flatten()
  
     # for each band get a dictionary of sampled values as a property of the sampleRegion feature
     sampleList= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': sampleData.aggregate_array(bandName)})))
