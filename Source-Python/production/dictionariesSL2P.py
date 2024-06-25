@@ -124,27 +124,38 @@ def make_net_options():
             "COPERNICUS/S2_SR_HARMONIZED": {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inputBands": ['B4', 'B5', 'B6', 'B7', 'B8A', 'B9', 'B11', 'B12']
+                "inputBands":      ['cosVZA', 'cosSZA', 'cosRAA', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8','B8A', 'B9','B11', 'B12'],
+                "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001,0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001,0.0001, 0.0001, 0.0001,0.0001, 0.0001],
+                "inputOffset":     [0,0,0,00,0,0,0,0,0,0,0,0,0,0,0],
             },
             "COPERNICUS/S2_SR_HARMONIZED_10m": {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inputBands": ['B2', 'B3', 'B4', 'B8']
+                "inputBands": ['cosVZA', 'cosSZA', 'cosRAA', 'B1','B2', 'B3', 'B4', 'B8'],
+                "inputScaling":    [0.0001, 0.0001, 0.0001, 0.0001,0.0001, 0.0001, 0.0001, 0.0001],
+                "inputOffset":     [0,0,0,0,0,0,0,0],
             },
             'LANDSAT/LC08/C02/T1_L2': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inputBands":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputBands":      ['cosVZA','cosSZA','cosRAA','SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+                "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2],
                 },
             'LANDSAT/LC09/C02/T1_L2': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
                 "inputBands":      [ 'SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputBands":      ['cosVZA','cosSZA','cosRAA','SR_B1','SR_B2','SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+                "inputScaling":     [0.0001,0.0001,0.0001,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05,2.75e-05],
+                "inputOffset":     [0,0,0,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2],
                 },
             'NASA/HLS/HLSL30/v002': {
                 "Name": 'Surface_Reflectance',
                 "description": 'Surface_Reflectance',
-                "inputBands":      [ 'B1','B2','B3', 'B4', 'B5', 'B6', 'B7'],
+                "inputBands":      ['cosVZA','cosSZA','cosRAA','B1','B2','B3', 'B4', 'B5', 'B6', 'B7'],
+                "inputScaling":     [0.0001,.0001,.0001,1,1,1,1,1,1,1],
+                "inputOffset":     [0,0,0,0,0,0,0,0,0,0],
                 },
             'users/rfernand387/L2avalidation': {
                 "Name": 'Surface_Reflectance',

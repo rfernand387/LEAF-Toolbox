@@ -14,13 +14,13 @@ def l8_createFeatureCollection_Network_Ind():
 # def l8_createImageCollection_partition():
 #     return ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles') \
 #               .map(lambda image :image.select("b1").rename("partition") ) \
-#               .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global") \
+#               .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global") \
 #                         .map( lambda image :image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
 def l8_createImageCollection_partition():
     return ee.ImageCollection(ee.Image('USGS/NLCD_RELEASES/2020_REL/NALCMS')) \
               .map(lambda image: image.rename("partition") )\
-              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
                         .map( lambda image :image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
 def l8_createFeatureCollection_legend():
@@ -93,14 +93,14 @@ def l9_createFeatureCollection_Network_Ind():
 # def l8_createImageCollection_partition():
 #     return ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles')\
 #               .map(lambda image :image.select("b1").rename("partition") )\
-#               .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+#               .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
 #                         .map( lambda image :image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 # 
 
 def l9_createImageCollection_partition():
     return ee.ImageCollection(ee.Image('USGS/NLCD_RELEASES/2020_REL/NALCMS'))\
               .map(lambda image :image.rename("partition"))\
-              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
                         .map( lambda image :image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
 
@@ -177,7 +177,7 @@ def s2_createFeatureCollection_Network_Ind():
 #def s2_createImageCollection_partition():
 #    return ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles')\
 #              .map(lambda image: image.select("b1").rename("partition") )\
-#              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+#              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
 #                        .map( lambda image: image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 #
 
@@ -185,7 +185,7 @@ def s2_createFeatureCollection_Network_Ind():
 def s2_createImageCollection_partition():
     return ee.ImageCollection(ee.Image('USGS/NLCD_RELEASES/2020_REL/NALCMS'))\
               .map(lambda image: image.rename("partition") )\
-              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
                         .map( lambda image: image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
 def s2_createFeatureCollection_legend():
@@ -268,7 +268,7 @@ def s2_10m_createFeatureCollection_Network_Ind():
 #def s2_createImageCollection_partition():
 #    return ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles')\
 #              .map(lambda image: image.select("b1").rename("partition") })\
-#              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+#              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
 #                        .map( lambda image: image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 #
 
@@ -276,7 +276,7 @@ def s2_10m_createFeatureCollection_Network_Ind():
 def s2_10m_createImageCollection_partition():
     return ee.ImageCollection(ee.Image('USGS/NLCD_RELEASES/2020_REL/NALCMS'))\
               .map(lambda image: image.rename("partition") )\
-              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global")\
+              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global")\
                         .map( lambda image: image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
 

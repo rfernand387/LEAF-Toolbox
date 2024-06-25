@@ -84,22 +84,25 @@ def makeProductCollection(colOptions,netOptions,variable,mapBounds,startDate,end
     return products
 
 # returns lists of sampled values for each band in an image as a new feature property
-def sampleProductCollection(productCollection, sampleRegion, outputScaleSize, factor=1) :
+def sampleProductCollection(productCollection, sampleRegion, outputScaleSize, factor=1,numPixels=0) :
 
     productCollection = ee.ImageCollection(productCollection)
     outputScaleSize= ee.Number(outputScaleSize)
     sampleRegion = ee.Feature(sampleRegion)
 
     # produce feature collection where each feature a feature collectiion corresponding to a list of samples from a given band from one product image
-    sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select(image.slice(4,5).bandNames()).projection(), scale=outputScaleSize,geometries=True, dropNulls = True, factor=factor) ).flatten()
- 
+    if (numPixels>0):
+        sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select(image.slice(4,5).bandNames()).projection(), scale=outputScaleSize,geometries=True, dropNulls = True, numPixels=numPixels) ).flatten()
+    else:
+        sampleData = productCollection.map(lambda image: image.sample(region=sampleRegion.geometry(), projection=image.select(image.slice(4,5).bandNames()).projection(), scale=outputScaleSize,geometries=True, dropNulls = True, factor=factor) ).flatten()
+    
     # for each band get a dictionary of sampled values as a property of the sampleRegion feature
     sampleList= ee.List(productCollection.first().bandNames().map(lambda bandName: ee.Dictionary({ 'bandName': bandName, 'data': sampleData.aggregate_array(bandName)})))
     
     return sampleRegion.set('samples',sampleList)
 
 # add dictionary of sampled values from product to a feature
-def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSpatialSize,inputScaleSize,startDate,endDate,outputScaleSize,factor=1):
+def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,bufferSpatialSize,inputScaleSize,startDate,endDate,outputScaleSize,factor=1,numPixels=0):
     
     # Buffer features is requested
     if ( bufferSpatialSize > 0 ):
@@ -113,7 +116,7 @@ def getSamples(site,variable,collectionOptions,networkOptions,maxCloudcover,buff
     productCollection = makeProductCollection(collectionOptions,networkOptions,variable,site.geometry(),startDate,endDate,maxCloudcover,inputScaleSize)
     if productCollection :
         if ( ee.ImageCollection(productCollection).size().gt(0) ) :
-            sampleFeature = sampleProductCollection(productCollection, site.geometry(),  outputScaleSize,factor)
+            sampleFeature = sampleProductCollection(productCollection, site.geometry(),  outputScaleSize,factor,numPixels)
 
     return  sampleFeature
 
@@ -180,8 +183,7 @@ def samplepartition(siteList,algorithm,bufferSpatialSize=0,outputFileName=None,n
                 imageCollectionName='COPERNICUS/S2_SR_HARMONIZED'
                 variableName='LAI'
                 sampleFeature= get_partition(site,collectionOptions[imageCollectionName],bufferSpatialSize,)
-                print(sampleFeature)
-            fffffff
+
             # if sampleFeature :
             #                 samplesDF = pd.concat([samplesDF,sampleFeature],ignore_index=True)
             # result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
@@ -194,7 +196,7 @@ def samplepartition(siteList,algorithm,bufferSpatialSize=0,outputFileName=None,n
     return outputDictionary
 
 
-def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,outputFileName=None,nlcd=None,plots=None): 
+def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,numPixels=0,outputFileName=None,nlcd=None,plots=None): 
     print('STARTING LEAF IMAGE for ',imageCollectionName)
     if outputFileName==None:
         outputFileName=os.getcwd()
@@ -226,7 +228,7 @@ def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',m
             samplesDF = pd.DataFrame()
             for index, Dates in dateRange.iterrows():
                 sampleFeature= getSamples(site,variableName,collectionOptions[imageCollectionName],networkOptions[variableName][imageCollectionName],maxCloudcover,bufferSpatialSize,inputScaleSize, \
-                                     Dates['startDate'],Dates['endDate'],outputScaleSize,subsamplingFraction)
+                                     Dates['startDate'],Dates['endDate'],outputScaleSize,subsamplingFraction,numPixels)
                 if sampleFeature :
                     samplesDF = pd.concat([samplesDF,samplestoDF(sampleFeature)],ignore_index=True)
             result.append({'feature': ee.Dictionary(ee.Feature(sampleRecords.get(n)).toDictionary()).getInfo() , \
@@ -239,7 +241,7 @@ def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',m
     return outputDictionary
     
 #sample features for LEAF output
-def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,outputFileName=None,feature_range=[0,np.nan]):
+def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,numPixels=0,outputFileName=None,feature_range=[0,np.nan]):
     print('STARTING LEAF IMAGE for ',imageCollectionName)
     if outputFileName==None:
         outputFileName=os.getcwd()

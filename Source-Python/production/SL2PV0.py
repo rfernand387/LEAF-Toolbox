@@ -31,7 +31,7 @@ def s2_createFeatureCollection_Network_Ind():
 def s2_createImageCollection_partition_old():
     return ee.ImageCollection('users/rfernand387/NA_NALCMS_2015_tiles') \
               .map(lambda image : image.select("b1").rename("partition") ) \
-              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V/Global") \
+              .merge(ee.ImageCollection("COPERNICUS/Landcover/100m/Proba-V-C3/Global") \
                         .map( lambda image : image.select("discrete_classification").remap([0,20,30,40,50,60,70,80,90,100,111,112,113,114,115,116,121,122,123,124,125,126,200],[0,8,10,15,17,16,19,18,14,13,1,3,1,5,6,6,2,4,2,5,6,6,18],0).toUint8().rename("partition")))
 
  # old version that used 2015 NA land cover
