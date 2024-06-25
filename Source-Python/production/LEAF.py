@@ -175,7 +175,7 @@ def samplepartition(siteList,algorithm,bufferSpatialSize=0,outputFileName=None,n
             site = ee.Feature(sampleRecords.get(n))
             esu=site.get('PLOT_ID').getInfo()
             if esu in ESUs:
-                print('Already sampeled')
+                print('Already sampled')
             else:
                 print(esu)
                 ESUs.append(esu)
@@ -221,7 +221,7 @@ def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',m
             
             esu=site.get('PLOT_ID').getInfo()
             print(esu)
-            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+            dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='ME'),columns=['startDate'])
             dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
             #dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
             # process one month at a time to prevent GEE memory limits
@@ -241,10 +241,10 @@ def sampleTimeSeries(siteList,imageCollectionName,algorithm,variableName='LAI',m
     return outputDictionary
     
 #sample features for LEAF output
-def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,numPixels=0,outputFileName=None,feature_range=[0,np.nan]):
+def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxCloudcover=100,outputScaleSize=30,inputScaleSize=30,bufferSpatialSize=0,bufferTemporalSize=[0,0],subsamplingFraction=1,numPixels=0,outputPathName=None,feature_range=[0,np.nan]):
     print('STARTING LEAF IMAGE for ',imageCollectionName)
-    if outputFileName==None:
-        outputFileName=os.getcwd()
+    if outputPathName==None:
+        outputPathName=os.getcwd()
 
     if (type(bufferTemporalSize[0])==str):
         try: 
@@ -262,8 +262,8 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
     networkOptions= dictionariesSL2P.make_net_options()
 
     ofn='_'.join([os.path.split(os.path.abspath(siteList[0]))[-1],imageCollectionName.replace('/','_'),variableName,str(feature_range[0]),str(feature_range[1]),algorithm.__name__,datetime.now().strftime("%Y_%m_%d_%Hh_%mmn")+'.pkl'])
-    outputFileName=os.path.join(outputFileName,ofn)
-    print('Output path: %s'%(outputFileName))
+    outputFileName=os.path.join(outputPathName,ofn)
+    print('Output file: %s'%(outputFileName))
 
     for input in siteList:   
         #Convert the feature collection to a list so we can apply SL2P on features in sequence to avoid time outs on GEE
@@ -285,7 +285,7 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             fp.close()
         #######
         
-        print('Data sampeling for features: from %s to %s'%(feature_range[0],feature_range[1]))
+        print('Data sampling for features: from %s to %s'%(feature_range[0],feature_range[1]))
         for n in range(feature_range[0],feature_range[1]) : #sampleRecords.size().getInfo()
             # select feature to process
             site = ee.Feature(sampleRecords.get(n))
@@ -312,8 +312,8 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             
             #do monthly processing 
             print(startDate,endDate)
-            if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
-                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+            if (len(pd.date_range(startDate,endDate,freq='ME')) > 0 ):
+                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='ME'),columns=['startDate'])
                 dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
             else:
                 dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
@@ -361,10 +361,8 @@ def imageSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClou
         for n in range(0,sampleRecords.size().getInfo()) : 
 
             # select feature to process
-            
             site = ee.Feature(sampleRecords.get(n))
-            print(site)
-            ffff
+            
             # get start and end date for this feature
             startDate = datetime.fromtimestamp(ee.Date(site.get('system:time_start')).advance(bufferTemporalSize[0],'day').getInfo()['value']/1000)
             endDate = datetime.fromtimestamp(ee.Date(site.get('system:time_end')).advance(bufferTemporalSize[1],'day').getInfo()['value']/1000)
@@ -372,8 +370,8 @@ def imageSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClou
  
             print('Processing feature:',n,' from ', startDate,' to ',endDate)
              #do monthly processing 
-            if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
-                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
+            if (len(pd.date_range(startDate,endDate,freq='ME')) > 0 ):
+                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='ME'),columns=['startDate'])
                 dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
             else:
                 dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
