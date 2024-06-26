@@ -312,8 +312,8 @@ def sampleSites(siteList,imageCollectionName,algorithm,variableName='LAI',maxClo
             
             #do monthly processing 
             print(startDate,endDate)
-            if (len(pd.date_range(startDate,endDate,freq='ME')) > 0 ):
-                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='ME'),columns=['startDate'])
+            if (len(pd.date_range(startDate,endDate,freq='m')) > 0 ):
+                dateRange = pd.DataFrame(pd.date_range(startDate,endDate,freq='m'),columns=['startDate'])
                 dateRange['endDate'] = pd.concat([dateRange['startDate'].tail(-1),pd.DataFrame([endDatePlusOne])],ignore_index=True).values
             else:
                 dateRange = pd.DataFrame( {'startDate':[startDate],'endDate':[endDatePlusOne]})
