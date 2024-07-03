@@ -44,7 +44,7 @@ def l8_createFeatureCollection_errors():
     return  ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes') \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_ROF_sobol_prosail_dbf_big_clumpedv3_NNT1_Single_0_1_incertitudes')) \
-    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2pccrs_sobol_4sail2_enf_NNT1_Single_0_1_incertitudes')) \
+    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_ccrs_sobol_4sail2_enf_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l8_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
@@ -111,7 +111,7 @@ def l9_createFeatureCollection_estimates():
     return  ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1') \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_ROF_sobol_prosail_dbf_big_clumpedv3_NNT1_Single_0_1')) \
-    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2pccrs_sobol_4sail2_enf_NNT1_Single_0_1')) \
+    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_ccrs_sobol_4sail2_enf_NNT1_Single_0_1')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1')) \
@@ -125,7 +125,7 @@ def l9_createFeatureCollection_errors():
     return  ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes') \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_ROF_sobol_prosail_dbf_big_clumpedv3_NNT1_Single_0_1_incertitudes')) \
-    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2pccrs_sobol_4sail2_mix_NNT1_Single_0_1_incertitudes')) \
+    .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_ccrs_sobol_4sail2_mix_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
     .merge(ee.FeatureCollection('projects/ee-modis250/assets/SL2P/l9_sl2p_weiss_or_prosail_NNT1_Single_0_1_incertitudes')) \
